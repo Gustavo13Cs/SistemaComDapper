@@ -1,0 +1,59 @@
+Dapper é tipo aquele brother rápido, leve e eficiente no rolê do banco de dados. Diferente do Entity Framework, que é mais engomadinho e cheio de firula, o Dapper vai direto ao ponto. Bora pras vantagens, sem enrolar
+
+🏎️ 1. Desempenho absurdo
+O Dapper é um dos ORM mais rápidos do mercado, porque ele é basicamente um micro ORM — não fica fazendo mágica nem abstrações pesadas. Ele compila os comandos SQL e mapeia os resultados direto na veia.
+
+🧠 2. Controle total com SQL puro
+Você escreve o SQL na mão. Pode parecer mais trabalhoso, mas te dá 100% de controle do que tá sendo executado. Nada de query bizarra gerada automaticamente.
+
+💾 3. Baixo consumo de memória
+Por não armazenar um monte de metadado nem fazer tracking de entidades, o Dapper é extremamente leve.
+
+🧩 4. Integra fácil com outros frameworks
+Você pode usar Dapper com ASP.NET Core, com qualquer banco SQL, junto com outras libs tipo AutoMapper, FluentValidation, etc. Casamento aberto e funcional.
+
+🪄 5. Mapeamento automático
+Apesar de ser minimalista, ele mapeia objetos automaticamente, mesmo com joins complexos (com o QueryMultiple, Query<T1, T2> etc). Parece mágica, mas é só engenharia bem feita.
+
+🐜 6. Código limpo e direto
+Nada de ficar criando mil arquivos, DbContext, migrations e afins. Você escreve seu repositório com IDbConnection e já era. Código limpo, sem enfeite.
+
+💥 7. Ótimo pra sistemas com muita leitura
+Se seu sistema tem muito SELECT e menos inserções ou alterações, o Dapper brilha! Ele é perfeito pra consultas rápidas e frequentes.
+
+
+
+as desvantagens do Dapper. Porque, né, nem tudo que é rápido e leve é perfeito (tipo miojo às 3 da manhã, sabe? Mata a fome, mas não vive só disso 😅).
+
+😵‍💫 1. Não tem Tracking de Entidade
+O Dapper não "lembra" dos objetos que você carregou. Se quiser atualizar algo, tem que montar o UPDATE na mão.
+Sem "DbContext.Entry(obj).State = Modified" aqui, chefia.
+
+🧱 2. Não tem suporte nativo a Migrations
+Quer criar, atualizar ou gerenciar estrutura de banco? Vai ter que usar algo externo (tipo FluentMigrator) ou fazer tudo no braço.
+Se não manjar de SQL, pode sofrer.
+
+🧠 3. Exige conhecimento forte de SQL
+Não tem escapatória: você vai escrever cada SELECT, INSERT, UPDATE e DELETE.
+Quem vem mimado do Entity Framework sofre um pouco no começo 😅.
+
+🥵 4. Repetição de código
+Sem abstrações automáticas. Se tiver muitas entidades com consultas parecidas, você vai repetir bastante código.
+DRY? Aqui é mais DIY (Do It Yourself).
+
+🧩 5. Relacionamentos complexos = trampo
+Mapeamento de joins com muitos relacionamentos pode virar um mini quebra-cabeça. Dá pra fazer? Dá. Mas é manual e suscetível a erro.
+
+🤖 6. Sem Lazy Loading
+Nada de acessar .Cliente.Endereco.Cidade e ele ir buscar tudo no banco sozinho. Se você quiser o dado, tem que pedir explicitamente.
+
+🧪 7. Sem validações e interceptações
+O Dapper não tem mecanismos embutidos pra validar entidades, aplicar regras, interceptar queries, logs sofisticados etc. Se quiser isso, você vai ter que construir.
+
+🧙‍♂️ Comparando com o EF:
+EF: é um mago cheio de feitiços automáticos, mas às vezes trava, é lento e faz coisa que você nem pediu.
+
+Dapper: é um guerreiro ágil com espada afiada. Faz o que você manda, mas se mandar errado, já era.
+
+
+
