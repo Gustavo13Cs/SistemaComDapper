@@ -1,4 +1,15 @@
+using System.Data;
+using MySqlConnector;
+
+
 var builder = WebApplication.CreateBuilder(args);
+
+
+// registra DI para conexão Dapper/MySQL
+var connectionString = builder.Configuration.GetConnectionString("Default");
+
+builder.Services.AddScoped<IDbConnection>((sp) =>
+new MySqlConnection(connectionString));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -24,6 +35,5 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
-
 
 app.Run();
