@@ -9,7 +9,7 @@ namespace Estacionamento.Models
     {
         public int Id { get; set; }= default!;
         public int Minutos { get; set; }= default!;
-        public float ValorCobrado { get; set; }= default!;
+        public decimal Valor { get; set; } = default!;
 
         // Relacionamento
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();

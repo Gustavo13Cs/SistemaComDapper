@@ -10,7 +10,7 @@ namespace Estacionamento.Models
         public int Id { get; set; } = default;
         public DateTime DataEntrada { get; set; } = default!;
         public DateTime? DataSaida { get; set; }
-        public float? Valor { get; set; } = default;
+        public decimal? Valor { get; set; } = default;
 
         // FKs
         public int VeiculoId { get; set; } = default!;
