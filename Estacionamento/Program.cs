@@ -1,4 +1,5 @@
 using System.Data;
+using Estacionamento.Repositorios;
 using MySqlConnector;
 
 
@@ -10,6 +11,9 @@ var connectionString = builder.Configuration.GetConnectionString("Default");
 
 builder.Services.AddScoped<IDbConnection>((sp) =>
 new MySqlConnection(connectionString));
+
+builder.Services.AddScoped(typeof(IRepositorio<>), typeof(RepositorioDapper<>));
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

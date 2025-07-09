@@ -2,6 +2,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using Estacionamento.Models;
+using Estacionamento.Repositorios;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Estacionamento.Controllers
@@ -9,17 +10,17 @@ namespace Estacionamento.Controllers
     [Route("/valores")]
     public class ValorDoMinutoController : Controller
     {
-        private readonly IDbConnection _connection;
+        private readonly IRepositorio<ValorDoMinuto> _repo;
 
-        public ValorDoMinutoController(IDbConnection connection)
+        public ValorDoMinutoController(IRepositorio<ValorDoMinuto> repo)
         {
-            _connection = connection;
+            _repo = repo;
         }
 
         [HttpGet("")]
         public IActionResult Index()
         {
-            var valores = _connection.Query<ValorDoMinuto>("SELECT * FROM Valores");
+            var valores = _repo.ObterTodos();
             return View(valores);
         }
 
@@ -32,81 +33,30 @@ namespace Estacionamento.Controllers
         [HttpPost("Criar")]
         public async Task<IActionResult> Criar([FromForm] ValorDoMinuto valorDoMinuto)
         {
-            var sql = @"
-                INSERT INTO Valores (Minutos, Valor)
-                VALUES (@Minutos, @Valor);
-            ";
-
-            var rowsInserted = await _connection.ExecuteAsync(sql, new
-            {
-                valorDoMinuto.Minutos,
-                valorDoMinuto.Valor
-            });
-
-            if (rowsInserted > 0)
-            {
-                TempData["Success"] = "Valor salvo com sucesso!";
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                ModelState.AddModelError("", "Não foi possível salvar.");
-                return View("Novo", valorDoMinuto);
-            }
+            _repo.Inserir(valorDoMinuto);
+            return Redirect("/valores");
         }
 
         [HttpPost("{id}/apagar")]
         public async Task<IActionResult> Apagar([FromRoute] int id)
         {
-            var sql = @"
-                Delete From Valores Where id=@id";
-
-            var rowsInserted = await _connection.ExecuteAsync(sql, new ValorDoMinuto { Id = id });
-
-            if (rowsInserted > 0)
-            {
-                TempData["Success"] = "Valor excluido com sucesso!";
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                ModelState.AddModelError("", "Não foi possível salvar.");
-                return View("Novo", id);
-            }
+            _repo.Excluir(id);
+            return Redirect("/valores");
         }
 
         [HttpGet("{id}/editar")]
         public IActionResult Editar([FromRoute]int id)
         {
-            var sql = "SELECT Id, Minutos, Valor AS Valor FROM Valores WHERE Id = @Id";
-            var valor = _connection.QueryFirstOrDefault<ValorDoMinuto>(sql, new { Id = id });
-
-            if (valor == null)
-                return NotFound();
-
-            return View(valor);
+           var valor = _repo.ObterPorId(id);
+            return Redirect("valor");
         }
-        
+
         [HttpPost("{id}/alterar")]
-        public async Task<IActionResult> Alterar([FromRoute]int id, [FromForm]ValorDoMinuto model)
+        public async Task<IActionResult> Alterar([FromRoute] int id, [FromForm] ValorDoMinuto valorDoMinuto)
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var sql = @"
-                UPDATE Valores
-                SET Minutos = @Minutos,
-                    Valor = @Valor
-                WHERE Id = @Id
-            ";
-
-                await _connection.ExecuteAsync(sql, new {
-                    model.Minutos,
-                    model.Valor,
-                    Id = id
-                });
-
-            return RedirectToAction("Index");
+            valorDoMinuto.Id = id;
+            _repo.Atualizar(valorDoMinuto);
+            return Redirect("/valores");
         }
 
     }
