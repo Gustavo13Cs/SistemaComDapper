@@ -1,0 +1,44 @@
+@using Estacionamento.Models
+@model IEnumerable<Ticket>
+@{
+    ViewData["Title"] = "Ticket";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Tickets</h1>
+     <a class="btn btn-primary" asp-area="" asp-controller="Tickets" asp-action="Novo">Novo</a></li>
+</div>
+
+<div class="text-center">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Data De Entrada</th>
+                <th>Data De Saida</th>
+                <th>Valor</th>
+                <th></th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model) {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.DataEntrada</td>
+                    <td>@item.DataSaida</td>
+                    <td>@item.Valor</td>
+                    <td>
+                        <form onsubmit="return confirm('Confirma?')" asp-route-id="@item.Id" asp-action="Apagar" asp-controller="Tickets" method="post">
+                            <input type="hidden" name="id" value="">
+                             <button type="submit" class="btn btn-danger">Excluir</button>
+                        </form>
+                    </td>
+                    <td>
+                        <a class="btn btn-warning" asp-route-id="@item.Id" asp-action="Editar" asp-controller="Tickets">Alterar</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

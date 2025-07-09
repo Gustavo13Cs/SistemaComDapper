@@ -21,7 +21,7 @@ namespace Estacionamento.Models
         [IgnoreInDapper]
         public Cliente Cliente { get; set; } = default!;
 
-        // Relacionamento
+        [IgnoreInDapper]
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }
 }

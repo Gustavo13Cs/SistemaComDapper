@@ -20,8 +20,8 @@ namespace Estacionamento.Controllers
         [HttpGet("")]
         public IActionResult Index()
         {
-            var valores = _repo.ObterTodos();
-            return View(valores);
+            var vagas = _repo.ObterTodos();
+            return View(vagas);
         }
 
         [HttpGet("novo")]
@@ -47,8 +47,8 @@ namespace Estacionamento.Controllers
         [HttpGet("{id}/editar")]
         public IActionResult Editar([FromRoute]int id)
         {
-           var valor = _repo.ObterPorId(id);
-            return View(valor);
+           var vagas = _repo.ObterPorId(id);
+            return View(vagas);
         }
 
         [HttpPost("{id}/alterar")]
@@ -56,7 +56,7 @@ namespace Estacionamento.Controllers
         {
             vaga.Id = id;
             _repo.Atualizar(vaga);
-            return Redirect("/vagas");
+            return Redirect("/Vagas");
         }
 
     }

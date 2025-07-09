@@ -7,21 +7,29 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Estacionamento.Controllers
 {
-    [Route("/veiculos")]
+    [Route("/Veiculos")]
     public class VeiculosController : Controller
     {
+        private readonly IDbConnection _cnn;
         private readonly IRepositorio<Veiculo> _repo;
 
-        public VeiculosController(IRepositorio<Veiculo> repo)
+        public VeiculosController(IDbConnection cnn)
         {
-            _repo = repo;
+            _repo = new RepositorioDapper<Veiculo>(cnn);
+            _cnn = cnn;
         }
 
-        [HttpGet("")]
         public IActionResult Index()
         {
-            var valores = _repo.ObterTodos();
-            return View(valores);
+            var sql = "SELECT v.*, c.* from veiculos v inner join clientes c on c.id = v.clienteId";
+            var veiculos = _cnn.Query<Veiculo, Cliente, Veiculo>(sql , (veiculo, cliente) =>
+            {
+                veiculo.Cliente = cliente;
+                return veiculo;
+            }, splitOn:"Id");
+
+
+            return View(veiculos);
         }
 
         [HttpGet("novo")]

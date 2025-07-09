@@ -15,6 +15,7 @@ namespace Estacionamento.Models
         public string CodigoLocalizacao { get; set; } = default!;
         public bool Ocupada { get; set; } = default!;
 
+        [IgnoreInDapper]
         // Relacionamento
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }

@@ -1,0 +1,65 @@
+@model Estacionamento.Models.Veiculo
+
+@{
+    ViewData["Title"] = "Novo Veículo";
+}
+
+<div class="text-center mb-4">
+    <h2 class="display-6">Cadastrar Novo Veículo</h2>
+</div>
+
+<form asp-action="Criar" asp-controller="Veiculos" method="post" class="needs-validation" novalidate>
+    <div class="row justify-content-center">
+        <div class="col-md-6 mb-3">
+            <label asp-for="Placa" class="form-label">Placa</label>
+            <input asp-for="Placa" class="form-control" required />
+            <div class="invalid-feedback">Informe a placa do veículo.</div>
+            <span asp-validation-for="Placa" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Modelo" class="form-label">Modelo</label>
+            <input asp-for="Modelo" class="form-control" required />
+            <div class="invalid-feedback">Informe o modelo do veículo.</div>
+            <span asp-validation-for="Modelo" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="Marca" class="form-label">Marca</label>
+            <input asp-for="Marca" class="form-control" required />
+            <div class="invalid-feedback">Informe a marca do veículo.</div>
+            <span asp-validation-for="Marca" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="ClienteId" class="form-label">Cliente</label>
+            <input asp-for="ClienteId" class="form-control" type="number" required />
+            <div class="invalid-feedback">Informe o ID do cliente dono do veículo.</div>
+            <span asp-validation-for="ClienteId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="text-center">
+        <button type="submit" class="btn btn-success">Salvar</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Validação Bootstrap
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.forEach.call(forms, function (form) {
+                    form.addEventListener('submit', function (event) {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}

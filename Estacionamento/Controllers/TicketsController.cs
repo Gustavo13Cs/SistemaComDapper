@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Estacionamento.Controllers
 {
-    [Route("/Veiculos")]
+    [Route("/Tickets")]
     public class TicketsController : Controller
     {
         private readonly IRepositorio<Ticket> _repo;
