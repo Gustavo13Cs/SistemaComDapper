@@ -38,13 +38,16 @@ namespace Estacionamento.Repositorios
             _conexao.Execute(sql, entidade);
         }
 
-        private object ObterCamposUpdate(T? entidade)
+        private string ObterCamposUpdate(T entidade)
         {
             var tipo = typeof(T);
-            var propriedades = tipo.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            var nomesCampos = propriedades.Select(p => $"@{p.Name} = @{p.Name}");
+            var propriedades = tipo.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.Name != "Id" && !Attribute.IsDefined(p, typeof(IgnoreInDapperAttribute)));
+
+            var nomesCampos = propriedades.Select(p => $"{p.Name} = @{p.Name}");
             return string.Join(", ", nomesCampos);
         }
+
 
         public void Excluir(int id)
         {
@@ -56,23 +59,32 @@ namespace Estacionamento.Repositorios
         {
             var campos = ObterCamposInsert(entidade);
             var valores = ObterValoresInsert(entidade);
-            var sql = $"INSERT INTO {_nomeTabela} ({campos}) VALUES ({valores}))";
+            var sql = $"INSERT INTO {_nomeTabela} ({campos}) VALUES ({valores})";
             _conexao.Execute(sql, entidade);
         }
 
         private object ObterValoresInsert(T? entidade)
         {
             var tipo = typeof(T);
-            var propriedades = tipo.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            var nomesCampos = propriedades.Select(p => $"@{p.Name}");
+            var propriedades = tipo.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => !Attribute.IsDefined(p, typeof(IgnoreInDapperAttribute))); // <- ISSO AQUI
+
+            var nomesCampos = propriedades.Select(p => "@" + p.Name);
             return string.Join(", ", nomesCampos);
         }
+
 
         private object ObterCamposInsert(T? entidade)
         {
             var tipo = typeof(T);
-            var propriedades = tipo.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            var nomesCampos = propriedades.Select(p => p.Name);
+            var propriedades = tipo.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            .Where(p => !Attribute.IsDefined(p, typeof(IgnoreInDapperAttribute)));
+            var nomesCampos = propriedades.Select(p =>
+            {
+                var colunaName = p.GetCustomAttribute<ColumnAttribute>()?.Name;
+                return colunaName ?? p.Name;
+            });
+            
             return string.Join(", ", nomesCampos);
         }
 

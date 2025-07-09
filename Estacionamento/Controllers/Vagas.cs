@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Estacionamento.Controllers
 {
-    [Route("/valores")]
-    public class ValorDoMinutoController : Controller
+    [Route("/Vagas")]
+    public class VagasController : Controller
     {
-        private readonly IRepositorio<ValorDoMinuto> _repo;
+        private readonly IRepositorio<Vaga> _repo;
 
-        public ValorDoMinutoController(IRepositorio<ValorDoMinuto> repo)
+        public VagasController(IRepositorio<Vaga> repo)
         {
             _repo = repo;
         }
@@ -31,32 +31,32 @@ namespace Estacionamento.Controllers
         }
 
         [HttpPost("Criar")]
-        public async Task<IActionResult> Criar([FromForm] ValorDoMinuto valorDoMinuto)
+        public async Task<IActionResult> Criar([FromForm] Vaga vaga)
         {
-            _repo.Inserir(valorDoMinuto);
-            return Redirect("/valores");
+            _repo.Inserir(vaga);
+            return Redirect("/vagas");
         }
 
         [HttpPost("{id}/apagar")]
         public async Task<IActionResult> Apagar([FromRoute] int id)
         {
             _repo.Excluir(id);
-            return Redirect("/valores");
+            return Redirect("/vagas");
         }
 
         [HttpGet("{id}/editar")]
         public IActionResult Editar([FromRoute]int id)
         {
            var valor = _repo.ObterPorId(id);
-            return Redirect("valor");
+            return View(valor);
         }
 
         [HttpPost("{id}/alterar")]
-        public async Task<IActionResult> Alterar([FromRoute] int id, [FromForm] ValorDoMinuto valorDoMinuto)
+        public async Task<IActionResult> Alterar([FromRoute] int id, [FromForm] Vaga vaga)
         {
-            valorDoMinuto.Id = id;
-            _repo.Atualizar(valorDoMinuto);
-            return Redirect("/valores");
+            vaga.Id = id;
+            _repo.Atualizar(vaga);
+            return Redirect("/vagas");
         }
 
     }

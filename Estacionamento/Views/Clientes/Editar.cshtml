@@ -1,0 +1,54 @@
+@model Estacionamento.Models.Cliente
+
+@{
+    ViewData["Title"] = "Editando o Cliente";
+}
+
+<div class="text-center">
+    <h1 class="text-center">Editando o Cliente</h1>
+</div>
+
+<form asp-action="Alterar" asp-controller="Clientes" method="post" asp-route-id="@Model.Id" class="needs-validation" novalidate>
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label for="Nome" class="form-label"></label>
+            <input asp-for="Nome" type="text" id="Nome" value="@Model.Nome" class="form-control" required />
+            <div class="invalid-feedback">
+                Informe o nome do cliente.
+            </div>
+            <span asp-validation-for="Nome" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label for="Cpf" class="form-label"></label>
+            <input asp-for="Cpf" type="text" id="Cpf" value="@Model.Cpf" class="form-control" required />
+            <div class="invalid-feedback">
+                Informe o Cpf do Cliente.
+            </div>
+            <span asp-validation-for="Cpf" class="text-danger"></span>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Voltar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Ativa classes de validação Bootstrap após tentativa de envio
+        (function () {
+            'use strict';
+            window.addEventListener('load', function () {
+                const forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.forEach.call(forms, form => {
+                    form.addEventListener('submit', event => {
+                        if (!form.checkValidity()) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);
+                });
+            }, false);
+        })();
+    </script>
+}
