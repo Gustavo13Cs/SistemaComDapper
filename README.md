@@ -44,7 +44,7 @@ Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva
 
 ### 💳 Ticket Pago & Liberação de Vaga
 
-<img src="https://i.ibb.co/fdh39rZc/PROJETO4.png" width="800"/>
+<img src="https://i.ibb.co/d4hhV5Nw/PROJETO5.png" width="800"/>
 
 ---
 
