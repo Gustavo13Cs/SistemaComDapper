@@ -61,7 +61,7 @@ Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva
 
 1. **Clone o repositório:**
    ```bash
-   git clone https://github.com/seu-usuario/seu-repositorio.git
+   git clone https://github.com/SistemaComDapper/tree/main/Estacionamento
    
 2. **Configure o appsettings.json com suas credenciais MySQL:**
    ```bash
