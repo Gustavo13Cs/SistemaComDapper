@@ -65,12 +65,14 @@ Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva
 1. **Clone o repositório:**
    ```bash
    git clone https://github.com/seu-usuario/seu-repositorio.git
-2. Configure o appsettings.json com suas credenciais MySQL:
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Database=estacionamento;Uid=root;Pwd=senha;"
-}
-3.Crie o banco de dados e execute os scripts SQL (em /Scripts)
-4. Execute a aplicação:
+   
+2. **Configure o appsettings.json com suas credenciais MySQL:**
+   ```bash
+   "ConnectionStrings": {"DefaultConnection": "Server=localhost;Database=estacionamento;Uid=root;Pwd=senha;"}
+
+3. **Crie o banco de dados e execute os scripts SQL (em /Scripts)**
+4. **Execute a aplicação:**
+   ```bash
    dotnet watch run
 
 Estrutura do Projeto
