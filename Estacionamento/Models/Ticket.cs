@@ -14,12 +14,12 @@ namespace Estacionamento.Models
         public int Id { get; set; } = default;
         public DateTime DataEntrada { get; set; } = default!;
         public DateTime? DataSaida { get; set; }
-        public decimal? Valor { get; set; } = default;
+        public float? Valor { get; set; } = default;
 
         // FKs
         public int VeiculoId { get; set; } = default!;
         [IgnoreInDapper]
-        public Veiculo Veiculo { get; set; } =default!;
+        public Veiculo Veiculo { get; set; } = default!;
 
         public int VagaId { get; set; } = default!;
         [IgnoreInDapper]
@@ -28,5 +28,25 @@ namespace Estacionamento.Models
         public int? ValoresId { get; set; }
         [IgnoreInDapper]
         public ValorDoMinuto? ValorInfo { get; set; }
+
+
+        public float ValorTotal(ValorDoMinuto valorDoMinuto, DateTime dataSaida)
+        {
+            if (this.DataSaida != null) return (float)this.Valor;
+
+            var valorMinuto = valorDoMinuto.Valor / valorDoMinuto.Minutos;
+
+            TimeSpan diferenca = dataSaida - this.DataEntrada;
+            int minutos = (int)diferenca.TotalMinutes;
+
+            return minutos * valorMinuto;
+        }
+
+        public void Pago(ValorDoMinuto valorDoMinuto)
+        {
+            var agora = DateTime.Now;
+            this.Valor = this.ValorTotal(valorDoMinuto, agora);
+            this.DataSaida = agora;
+        }
     }
 }

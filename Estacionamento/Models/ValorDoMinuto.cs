@@ -15,9 +15,10 @@ namespace Estacionamento.Models
 
         [Column("minutos")]
         public int Minutos { get; set; } = default!;
-        public decimal Valor { get; set; } = default!;
+        public float Valor { get; set; } = default!;
 
         // Relacionamento
+        [IgnoreInDapper]
         public ICollection<Ticket> Tickets { get; set; } = new List<Ticket>();
     }
 }

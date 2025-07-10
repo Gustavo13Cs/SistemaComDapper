@@ -17,9 +17,11 @@
                 <th>Nome do Cliente</th>
                 <th>Placa do Carro</th>
                 <th>Modelo</th>
-                <th>Data De Entrada</th>
-                <th>Data De Saida</th>
+                <th>Marca</th>
                 <th>Local</th>
+                <th>Data De Entrada</th>
+                <th>Valor Total</th>
+                <th>Data De Saida</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -32,8 +34,10 @@
                     <td>@item.Veiculo.Placa</td>
                     <td>@item.Veiculo.Marca</td>
                     <td>@item.Veiculo.Modelo</td>
-                    <td>@item.DataEntrada.ToString("dd/MM/yyy HH:MM")</td>
                     <td>@item.Vaga.CodigoLocalizacao</td>
+                    <td>@item.DataEntrada.ToString("dd/MM/yyy HH:MM")</td>
+                    <td>@item.ValorTotal(ViewBag.ValorDoMinuto).ToString("C", new System.Globalization.CultureInfo("pt-BR"))</td>
+                    <td>@item.DataSaida?.ToString("dd/MM/yyy HH:MM")</td>
                     <td>
                         <form onsubmit="return confirm('Confirma?')" asp-route-id="@item.Id" asp-action="Apagar" asp-controller="Tickets" method="post">
                             <input type="hidden" name="id" value="">
@@ -41,7 +45,9 @@
                         </form>
                     </td>
                     <td>
-                        <a class="btn btn-warning" asp-route-id="@item.Id" asp-action="Editar" asp-controller="Tickets">Alterar</a>
+                        <form onsubmit="return confirm('Confirma Pagamento?')" asp-route-id="@item.Id" asp-action="Pago" asp-controller="Tickets" method="post">
+                            <button class="btn btn-success" asp-route-id="@item.Id" asp-action="Pago" asp-controller="Tickets">R$ Pago</button>
+                        </form>
                     </td>
                 </tr>
             }

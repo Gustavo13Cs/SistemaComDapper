@@ -34,6 +34,8 @@ namespace Estacionamento.Controllers
                 return ticket;
             }, splitOn: "Id, Id, Id");
 
+            ViewBag.ValorDoMinuto = _cnn.QueryFirstOrDefault<ValorDoMinuto>("Select * From valores order by id desc limit 1");
+
             return View(tickets);
         }
 
@@ -59,6 +61,29 @@ namespace Estacionamento.Controllers
             _repo.Inserir(ticket);
             alteraStatusVaga(ticket.VagaId, true);
 
+            return Redirect("/tickets");
+        }
+
+        [HttpPost("{id}/pago")]
+        public async Task<IActionResult> Pago([FromRoute] int id)
+        {
+            var sql = "SELECT t.*, v.*, c.*, vg.* from tickets t inner join Veiculos v on v.id = t.veiculoId INNER JOIN clientes c ON c.id = v.clienteId INNER JOIN vagas vg ON vg.id = t.vagaId where t.id = @id";
+            Ticket? ticket = _cnn.Query<Ticket, Veiculo, Cliente, Vaga, Ticket>(sql, (ticket, veiculo, cliente, Vaga) =>
+            {
+                veiculo.Cliente = cliente;
+                ticket.Veiculo = veiculo;
+                ticket.Vaga = Vaga;
+                return ticket;
+            },new { id = id } ,splitOn: "Id, Id, Id").FirstOrDefault();
+
+            if (ticket != null)
+            {
+                var valorDoMinuto = _cnn.QueryFirstOrDefault<ValorDoMinuto>("Select * From valores order by id desc limit 1");
+                ticket.Pago(valorDoMinuto);
+                _repo.Atualizar(ticket);
+                alteraStatusVaga(ticket.VagaId, false);        
+            }
+        
             return Redirect("/tickets");
         }
 
@@ -120,11 +145,13 @@ namespace Estacionamento.Controllers
             return veiculo;
         }
 
-        private void alteraStatusVaga(int VagaId , bool ocupada)
+        private void alteraStatusVaga(int VagaId, bool ocupada)
         {
             var sql = $"UPDATE vagas SET ocupada = true where id = @Id";
-            _cnn.Execute(sql, new Vaga { Id = VagaId , Ocupada = ocupada});
+            _cnn.Execute(sql, new Vaga { Id = VagaId, Ocupada = ocupada });
         }
+        
+
 
 
     }
