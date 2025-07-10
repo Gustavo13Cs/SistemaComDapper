@@ -75,13 +75,3 @@ Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva
    ```bash
    dotnet watch run
 
-Estrutura do Projeto
-
-📁 Estacionamento/
-├── Controllers/
-├── Models/
-├── Views/
-├── wwwroot/
-├── Program.cs
-├── appsettings.json
-└── README.md
