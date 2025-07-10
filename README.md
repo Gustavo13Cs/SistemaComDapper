@@ -36,7 +36,7 @@ Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva
 
 ### 🎛️ Dashboard Inicial
 
-<img src="caminho/para/sua/imagem1.png" width="800"/>
+<img src="[caminho/para/sua/imagem1.pn](https://i.ibb.co/W4d77Nyj/Projeto.png)g" width="800"/>
 
 ### 👥 Gerenciamento de Clientes
 
