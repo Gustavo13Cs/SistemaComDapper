@@ -3,7 +3,7 @@
 Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva desenvolvida em **C#** com **Dapper** e **MySQL**, que permite o gerenciamento completo de um estacionamento com atualização em tempo real de vagas e tickets.
 
 <div align="center">
-  <img src="caminho/para/sua/imagem1.png" width="800"/>
+  <img src="[https://komarev.com/ghpvc/?username=Gustavo13Cs&color=yellow](https://ibb.co/C3X44p7D)" />
 </div>
 
 ---
