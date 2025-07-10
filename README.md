@@ -1,5 +1,11 @@
 # 🚗 Sistema de Estacionamento
 
+![GitHub repo size](https://img.shields.io/github/repo-size/Gustavo13Cs/SistemaComDapper?style=for-the-badge)
+![GitHub language count](https://img.shields.io/github/languages/count/Gustavo13Cs/SistemaComDapper?style=for-the-badge)
+![GitHub forks](https://img.shields.io/github/forks/Gustavo13Cs/SistemaComDapper?style=for-the-badge)
+![Bitbucket open issues](https://img.shields.io/bitbucket/Gustavo13Cs/SistemaComDapper?style=for-the-badge)
+![Bitbucket open pull requests](https://img.shields.io/bitbucket/pr-raw/Gustavo13Cs/SistemaComDapper?style=for-the-badge)
+
 Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva desenvolvida em **C#** com **Dapper** e **MySQL**, que permite o gerenciamento completo de um estacionamento com atualização em tempo real de vagas e tickets.
 
 <div align="center">
