@@ -14,9 +14,12 @@
         <thead>
             <tr>
                 <th>Id</th>
+                <th>Nome do Cliente</th>
+                <th>Placa do Carro</th>
+                <th>Modelo</th>
                 <th>Data De Entrada</th>
                 <th>Data De Saida</th>
-                <th>Valor</th>
+                <th>Local</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -25,9 +28,12 @@
             @foreach(var item in Model) {
                 <tr>
                     <td>@item.Id</td>
-                    <td>@item.DataEntrada</td>
-                    <td>@item.DataSaida</td>
-                    <td>@item.Valor</td>
+                    <td>@item.Veiculo.Cliente.Nome</td>
+                    <td>@item.Veiculo.Placa</td>
+                    <td>@item.Veiculo.Marca</td>
+                    <td>@item.Veiculo.Modelo</td>
+                    <td>@item.DataEntrada.ToString("dd/MM/yyy HH:MM")</td>
+                    <td>@item.Vaga.CodigoLocalizacao</td>
                     <td>
                         <form onsubmit="return confirm('Confirma?')" asp-route-id="@item.Id" asp-action="Apagar" asp-controller="Tickets" method="post">
                             <input type="hidden" name="id" value="">

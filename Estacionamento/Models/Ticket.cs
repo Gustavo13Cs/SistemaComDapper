@@ -22,9 +22,11 @@ namespace Estacionamento.Models
         public Veiculo Veiculo { get; set; } =default!;
 
         public int VagaId { get; set; } = default!;
-        public Vaga Vaga { get; set; } = null!;
+        [IgnoreInDapper]
+        public Vaga Vaga { get; set; } = default!;
 
         public int? ValoresId { get; set; }
+        [IgnoreInDapper]
         public ValorDoMinuto? ValorInfo { get; set; }
     }
 }

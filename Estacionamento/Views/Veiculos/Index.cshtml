@@ -18,6 +18,7 @@
                 <th>Placa</th>
                 <th>Modelo</th>
                 <th>Marca</th>
+                <th>Nome</th>
                 <th></th>
                 <th></th>
             </tr>
@@ -29,6 +30,7 @@
                     <td>@item.Placa</td>
                     <td>@item.Modelo</td>
                     <td>@item.Marca</td>
+                    <td>@item.Cliente.Nome</td>
                     <td>
                         <form onsubmit="return confirm('Confirma?')" asp-route-id="@item.Id" asp-action="Apagar" asp-controller="Veiculos" method="post">
                             <input type="hidden" name="id" value="">
