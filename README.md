@@ -36,19 +36,15 @@ Bem-vindo ao **Sistema de Estacionamento**, uma aplicação moderna e responsiva
 
 ### 🎛️ Dashboard Inicial
 
-<img src="[caminho/para/sua/imagem1.pn](https://i.ibb.co/W4d77Nyj/Projeto.png)g" width="800"/>
+<img src="https://i.ibb.co/W4d77Nyj/Projeto.png" width="800"/>
 
 ### 👥 Gerenciamento de Clientes
 
-<img src="caminho/para/sua/imagem2.png" width="800"/>
-
-### 🎫 Tickets de Estacionamento
-
-<img src="caminho/para/sua/imagem3.png" width="800"/>
+<img src="https://i.ibb.co/fdh39rZc/PROJETO4.png" width="800"/>
 
 ### 💳 Ticket Pago & Liberação de Vaga
 
-<img src="caminho/para/sua/imagem4.png" width="800"/>
+<img src="https://i.ibb.co/fdh39rZc/PROJETO4.png" width="800"/>
 
 ---
 
