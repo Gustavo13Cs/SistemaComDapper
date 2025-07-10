@@ -1,42 +1,40 @@
-@using Estacionamento.Models
-@model IEnumerable<Cliente>
-@{
-    ViewData["Title"] = "Clientes";
-}
+@model IEnumerable<Estacionamento.Models.Cliente>
 
-<div class="text-center">
-    <h1 class="display-4">Clientes</h1>
-     <a class="btn btn-primary" asp-area="" asp-controller="Clientes" asp-action="Novo">Novo</a></li>
-</div>
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 text-info fw-bold">Clientes</h1>
+        <a class="btn btn-primary btn-novo" asp-controller="Clientes" asp-action="Novo">Novo</a>
+    </div>
 
-<div class="text-center">
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nome</th>
-                <th>CPF</th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var item in Model) {
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered text-center align-middle">
+            <thead class="table-dark">
                 <tr>
-                    <td>@item.Id</td>
-                    <td>@item.Nome</td>
-                    <td>@item.Cpf</td>
-                    <td>
-                        <form onsubmit="return confirm('Confirma?')" asp-route-id="@item.Id" asp-action="Apagar" asp-controller="Clientes" method="post">
-                            <input type="hidden" name="id" value="">
-                             <button type="submit" class="btn btn-danger">Excluir</button>
-                        </form>
-                    </td>
-                    <td>
-                        <a class="btn btn-warning" asp-route-id="@item.Id" asp-action="Editar" asp-controller="Clientes">Alterar</a>
-                    </td>
+                    <th>Id</th>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th></th>
+                    <th></th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Nome</td>
+                        <td>@item.Cpf</td>
+                        <td>
+                            <a asp-controller="Clientes" asp-action="Editar" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Editar</a>
+                        </td>
+                        <td>
+                            <form asp-controller="Clientes" asp-action="Apagar" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Confirma?')">
+                                <button class="btn btn-danger btn-sm">Excluir</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

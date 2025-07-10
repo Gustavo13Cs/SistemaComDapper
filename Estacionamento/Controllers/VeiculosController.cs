@@ -4,6 +4,7 @@ using Dapper;
 using Estacionamento.Models;
 using Estacionamento.Repositorios;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Estacionamento.Controllers
 {
@@ -35,12 +36,23 @@ namespace Estacionamento.Controllers
         [HttpGet("novo")]
         public IActionResult Novo()
         {
+            var sql = "SELECT * FROM clientes";
+            var clientes = _cnn.Query<Cliente>(sql);
+            ViewBag.Clientes = new SelectList(clientes, "Id", "Nome");
             return View();
         }
 
         [HttpPost("Criar")]
         public async Task<IActionResult> Criar([FromForm] Veiculo veiculo)
         {
+            if (veiculo.ClienteId == 0)
+            {
+                ModelState.AddModelError("ClienteId", "Selecione um cliente.");
+                var sql = "SELECT * FROM clientes";
+                var clientes = _cnn.Query<Cliente>(sql);
+                ViewBag.Clientes = new SelectList(clientes, "Id", "Nome");
+                return View(veiculo);
+            }
             _repo.Inserir(veiculo);
             return Redirect("/veiculos");
         }

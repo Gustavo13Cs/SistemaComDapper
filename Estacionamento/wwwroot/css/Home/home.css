@@ -1,0 +1,119 @@
+body {
+    background-color: #1f1f2e;
+    color: #f0f0f0;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.card-dashboard {
+    background-color: #2c2c3a;
+    border: none;
+    border-radius: 10px;
+    transition: all 0.2s ease-in-out;
+}
+
+.card-dashboard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 10px rgba(79, 209, 197, 0.5);
+}
+
+.card-dashboard i {
+    font-size: 2.5rem;
+    color: #4fd1c5;
+}
+
+.card-dashboard .card-title {
+    color: #fff;
+}
+
+.card-dashboard .btn {
+    margin-top: 10px;
+}
+
+h1.display-4 {
+    color: #4fd1c5;
+}
+
+.container {
+    min-height: 100vh;
+}
+
+/* Textos gerais */
+body,
+label,
+input,
+select,
+textarea,
+.form-control,
+.form-label,
+.card-title {
+    color: #ffffff !important;
+}
+
+/* Placeholder branco */
+::placeholder {
+    color: #ccc !important;
+}
+
+/* Cor de fundo dos inputs */
+.form-control,
+.form-select {
+    background-color: #2a2a3a;
+    border: 1px solid #444;
+}
+
+/* Botões */
+.btn {
+    color: #ffffff;
+}
+
+/* Corrige botão secundário */
+.btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
+
+/* Corrige botão de formulário (hover) */
+.btn:hover {
+    opacity: 0.9;
+}
+
+input.form-control,
+textarea.form-control,
+select.form-select {
+    color: #ffffff !important;
+    background-color: #2a2a3a !important;
+    border: 1px solid #444 !important;
+}
+
+input.form-control:focus,
+textarea.form-control:focus,
+select.form-select:focus {
+    background-color: #2a2a3a !important;
+    color: #ffffff !important;
+    border-color: #4fd1c5 !important;
+    box-shadow: 0 0 0 0.2rem rgba(79, 209, 197, 0.25);
+}
+
+select.form-control,
+select.form-select,
+select {
+    color: #ffffff !important;
+    background-color: #2a2a3a !important;
+    border: 1px solid #444 !important;
+}
+
+select option {
+    background-color: #2a2a3a;
+    color: #ffffff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: bold;
+}
+
+
+.btn-novo {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+

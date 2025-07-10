@@ -32,10 +32,7 @@ namespace Estacionamento.Models
 
         public float ValorTotal(ValorDoMinuto valorDoMinuto, DateTime dataSaida)
         {
-            if (this.DataSaida != null) return (float)this.Valor;
-
             var valorMinuto = valorDoMinuto.Valor / valorDoMinuto.Minutos;
-
             TimeSpan diferenca = dataSaida - this.DataEntrada;
             int minutos = (int)diferenca.TotalMinutes;
 

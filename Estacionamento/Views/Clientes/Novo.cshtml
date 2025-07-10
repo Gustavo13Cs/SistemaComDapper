@@ -1,56 +1,26 @@
 @model Estacionamento.Models.Cliente
 
-@{
-    ViewData["Title"] = "Incluir Cliente";
-}
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card card-dashboard p-5" style="width: 100%; max-width: 600px;">
+        <h2 class="text-center text-info mb-4">Novo Cliente</h2>
 
-<h2>@ViewData["Title"]</h2>
-
-<div class="text-center">
-    <h1 class="text-center">Novo Cliente</h1>
-</div>
-
-<form asp-action="Criar" asp-controller="Clientes" method="post" class="needs-validation" novalidate>
-    <div class="row">
-        <div class="col-md-6 mb-3">
-            <label asp-for="Nome" class="form-label"></label>
-            <input asp-for="Nome" type="text" class="form-control" required />
-            <div class="invalid-feedback">
-                Informe o nome do cliente
+        <form asp-action="Criar" method="post" class="needs-validation" novalidate>
+            <div class="mb-3">
+                <label asp-for="Nome" class="form-label">Nome</label>
+                <input asp-for="Nome" class="form-control" required />
+                <span asp-validation-for="Nome" class="text-danger"></span>
             </div>
-            <span asp-validation-for="Nome" class="text-danger"></span>
-        </div>
-        <div class="col-md-6 mb-3">
-            <label asp-for="Cpf" class="form-label"></label>
-            <input asp-for="Cpf" type="text" class="form-control" required />
-            <div class="invalid-feedback">
-                Informe o CPF do cliente.
+
+            <div class="mb-3">
+                <label asp-for="Cpf" class="form-label">CPF</label>
+                <input asp-for="Cpf" class="form-control" required />
+                <span asp-validation-for="Cpf" class="text-danger"></span>
             </div>
-            <span asp-validation-for="Cpf" class="text-danger"></span>
-        </div>
+
+            <div class="text-center">
+                <button class="btn btn-success">Salvar</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
     </div>
-    <button type="submit" class="btn btn-primary">Salvar</button>
-    <a asp-action="Index" class="btn btn-secondary">Voltar</a>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-    <script>
-        // Ativa classes de validação Bootstrap após tentativa de envio
-        (function () {
-            'use strict';
-            window.addEventListener('load', function () {
-                const forms = document.getElementsByClassName('needs-validation');
-                Array.prototype.forEach.call(forms, form => {
-                    form.addEventListener('submit', event => {
-                        if (!form.checkValidity()) {
-                            event.preventDefault();
-                            event.stopPropagation();
-                        }
-                        form.classList.add('was-validated');
-                    }, false);
-                });
-            }, false);
-        })();
-    </script>
-}
+</div>

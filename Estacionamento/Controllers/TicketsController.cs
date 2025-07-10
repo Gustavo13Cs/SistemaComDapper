@@ -83,6 +83,11 @@ namespace Estacionamento.Controllers
                 _repo.Atualizar(ticket);
                 alteraStatusVaga(ticket.VagaId, false);        
             }
+
+             // Atualiza a vaga relacionada
+            var vaga = _repoVaga.ObterPorId(ticket.VagaId);
+            vaga.Ocupada = false;
+            _repoVaga.Atualizar(vaga);
         
             return Redirect("/tickets");
         }
@@ -92,6 +97,13 @@ namespace Estacionamento.Controllers
         {
             var ticket = _repo.ObterPorId(id);
             alteraStatusVaga(ticket.VagaId, false);
+
+            var vaga = _repoVaga.ObterPorId(ticket.VagaId);
+            if (vaga != null)
+            {
+                vaga.Ocupada = false;
+                _repoVaga.Atualizar(vaga);
+            }
             _repo.Excluir(id);
             return Redirect("/tickets");
         }

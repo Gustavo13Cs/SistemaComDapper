@@ -29,10 +29,10 @@
             <span asp-validation-for="Marca" class="text-danger"></span>
         </div>
         <div class="col-md-6 mb-3">
-            <label asp-for="ClienteId" class="form-label">Cliente</label>
-            <input asp-for="ClienteId" class="form-control" type="number" required />
-            <div class="invalid-feedback">Informe o ID do cliente dono do veículo.</div>
-            <span asp-validation-for="ClienteId" class="text-danger"></span>
+           <label asp-for="ClienteId" class="form-label">Cliente</label>
+            <select asp-for="ClienteId" class="form-select" asp-items="ViewBag.Clientes">
+                <option value="">-- Selecione um cliente --</option>
+            </select>
         </div>
     </div>
 
