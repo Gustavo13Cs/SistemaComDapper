@@ -42,6 +42,7 @@ namespace Estacionamento.Controllers
         [HttpGet("novo")]
         public IActionResult Novo()
         {
+            PreencheClientesViewBag();
             preencheVagasViewVag();
             return View();
         }
@@ -49,7 +50,7 @@ namespace Estacionamento.Controllers
         [HttpPost("Criar")]
         public async Task<IActionResult> Criar([FromForm] TicketDTO ticketDTO)
         {
-            Cliente cliente = BuscaOuCadastrarClientePorDTO(ticketDTO);
+            var cliente = _cnn.QueryFirstOrDefault<Cliente>("SELECT * FROM clientes WHERE id = @id", new { id = ticketDTO.Id});
             Veiculo veiculo = BuscaOuCadastrarVeiculoPorDTO(ticketDTO, cliente);
 
 
@@ -74,21 +75,21 @@ namespace Estacionamento.Controllers
                 ticket.Veiculo = veiculo;
                 ticket.Vaga = Vaga;
                 return ticket;
-            },new { id = id } ,splitOn: "Id, Id, Id").FirstOrDefault();
+            }, new { id = id }, splitOn: "Id, Id, Id").FirstOrDefault();
 
             if (ticket != null)
             {
                 var valorDoMinuto = _cnn.QueryFirstOrDefault<ValorDoMinuto>("Select * From valores order by id desc limit 1");
                 ticket.Pago(valorDoMinuto);
                 _repo.Atualizar(ticket);
-                alteraStatusVaga(ticket.VagaId, false);        
+                alteraStatusVaga(ticket.VagaId, false);
             }
 
-             // Atualiza a vaga relacionada
+            // Atualiza a vaga relacionada
             var vaga = _repoVaga.ObterPorId(ticket.VagaId);
             vaga.Ocupada = false;
             _repoVaga.Atualizar(vaga);
-        
+
             return Redirect("/tickets");
         }
 
@@ -162,6 +163,14 @@ namespace Estacionamento.Controllers
             var sql = $"UPDATE vagas SET ocupada = true where id = @Id";
             _cnn.Execute(sql, new Vaga { Id = VagaId, Ocupada = ocupada });
         }
+        
+        private void PreencheClientesViewBag()
+        {
+            var sql = "SELECT * FROM clientes";
+            var clientes = _cnn.Query<Cliente>(sql);
+            ViewBag.Clientes = new SelectList(clientes, "Id", "Nome");
+        }
+
         
 
 

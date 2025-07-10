@@ -17,10 +17,19 @@ namespace Estacionamento.Controllers
             _repo = repo;
         }
 
-        [HttpGet("")]
-        public IActionResult Index()
+        [HttpGet("/clientes/index")]
+        public IActionResult Index([FromQuery] string? busca)
         {
             var valores = _repo.ObterTodos();
+
+            if (!string.IsNullOrEmpty(busca))
+            {
+                busca = busca.ToLower().Trim();
+                valores = valores.Where(c =>
+                    c.Nome.ToLower().Contains(busca) ||
+                    c.Cpf.ToLower().Contains(busca)).ToList();
+            }
+
             return View(valores);
         }
 
@@ -34,14 +43,15 @@ namespace Estacionamento.Controllers
         public async Task<IActionResult> Criar([FromForm] Cliente cliente)
         {
             _repo.Inserir(cliente);
-            return Redirect("/clientes");
+            return RedirectToAction("Index");
+
         }
 
         [HttpPost("{id}/apagar")]
         public async Task<IActionResult> Apagar([FromRoute] int id)
         {
             _repo.Excluir(id);
-            return Redirect("/clientes");
+            return RedirectToAction("Index");
         }
 
         [HttpGet("{id}/editar")]
@@ -56,7 +66,8 @@ namespace Estacionamento.Controllers
         {
             cliente.Id = id;
             _repo.Atualizar(cliente);
-            return Redirect("/clientes");
+            return RedirectToAction("Index");
+
         }
 
     }
