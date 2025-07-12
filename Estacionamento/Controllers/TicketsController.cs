@@ -16,10 +16,13 @@ namespace Estacionamento.Controllers
         private readonly IRepositorio<Ticket> _repo;
         private readonly IRepositorio<Vaga> _repoVaga;
 
+        private readonly IRepositorio<HistoricoVagas> _historicoRepo;
+
         public TicketsController(IDbConnection cnn)
         {
             _repo = new RepositorioDapper<Ticket>(cnn);
             _repoVaga = new RepositorioDapper<Vaga>(cnn);
+            _historicoRepo = new RepositorioDapper<HistoricoVagas>(cnn);
             _cnn = cnn;
         }
         [HttpGet("")]
@@ -50,7 +53,7 @@ namespace Estacionamento.Controllers
         [HttpPost("Criar")]
         public async Task<IActionResult> Criar([FromForm] TicketDTO ticketDTO)
         {
-            var cliente = _cnn.QueryFirstOrDefault<Cliente>("SELECT * FROM clientes WHERE id = @id", new { id = ticketDTO.Id});
+            var cliente = _cnn.QueryFirstOrDefault<Cliente>("SELECT * FROM clientes WHERE id = @id", new { id = ticketDTO.Id });
             Veiculo veiculo = BuscaOuCadastrarVeiculoPorDTO(ticketDTO, cliente);
 
 
@@ -84,12 +87,13 @@ namespace Estacionamento.Controllers
                 _repo.Atualizar(ticket);
                 alteraStatusVaga(ticket.VagaId, false);
             }
-
             // Atualiza a vaga relacionada
             var vaga = _repoVaga.ObterPorId(ticket.VagaId);
             vaga.Ocupada = false;
             _repoVaga.Atualizar(vaga);
+            RegistrarHistorico(ticket);
 
+            TempData["Success"] = "Ticket pago com sucesso!";
             return Redirect("/tickets");
         }
 
@@ -160,10 +164,10 @@ namespace Estacionamento.Controllers
 
         private void alteraStatusVaga(int VagaId, bool ocupada)
         {
-            var sql = $"UPDATE vagas SET ocupada = true where id = @Id";
-            _cnn.Execute(sql, new Vaga { Id = VagaId, Ocupada = ocupada });
+            const string sql = "UPDATE vagas SET Ocupada = @Ocupada WHERE Id = @Id";
+            _cnn.Execute(sql, new { Id = VagaId, Ocupada = ocupada });
         }
-        
+
         private void PreencheClientesViewBag()
         {
             var sql = "SELECT * FROM clientes";
@@ -171,9 +175,33 @@ namespace Estacionamento.Controllers
             ViewBag.Clientes = new SelectList(clientes, "Id", "Nome");
         }
 
-        
+        private void RegistrarHistorico(Ticket ticket)
+        {
+            var tempoTotal = (ticket.DataSaida.Value - ticket.DataEntrada).TotalMinutes;
+
+            // Cria DTO com os dados simples
+            var historicoDTO = new HistoricoVagasDTO
+            {
+                VagaId = ticket.VagaId,
+                VeiculoId = ticket.VeiculoId,
+                TicketId = ticket.Id,
+                NumeroTicket = ticket.Id, // <-- AQUI!
+                DataEntrada = ticket.DataEntrada,
+                DataSaida = ticket.DataSaida.Value,
+                ValorCobrado = ticket.Valor ?? 0,
+                TempoTotalMinutos = (int)tempoTotal
+            };
+
+            // Insere no banco via Dapper, evitando erro com propriedades complexas
+            const string sql = @"
+            INSERT INTO historicovagas
+            (VagaId, VeiculoId, TicketId, NumeroTicket, DataEntrada, DataSaida, ValorCobrado, TempoTotalMinutos)
+            VALUES
+            (@VagaId, @VeiculoId, @TicketId, @NumeroTicket, @DataEntrada, @DataSaida, @ValorCobrado, @TempoTotalMinutos)";
 
 
+            _cnn.Execute(sql, historicoDTO);
+        }
 
     }
 }
