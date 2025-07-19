@@ -45,5 +45,33 @@ namespace Estacionamento.Models
             this.Valor = this.ValorTotal(valorDoMinuto, agora);
             this.DataSaida = agora;
         }
+
+        private float ObterTarifaPorMinuto(DateTime minuto, List<TarifaEspecial> tarifas, float valorPadrao)
+        {
+            var horaDoMinuto = minuto.TimeOfDay;
+
+            var tarifa = tarifas.FirstOrDefault(t =>
+                horaDoMinuto >= t.HoraInicio && horaDoMinuto <= t.HoraFim);
+
+            return tarifa?.ValorPorMinuto ?? valorPadrao;
+        }
+
+        public float CalcularValor(ValorDoMinuto valorPadrao, List<TarifaEspecial> tarifasEspeciais)
+        {
+            if (DataSaida == null) return 0;
+
+            int minutosTotais = (int)(DataSaida.Value - DataEntrada).TotalMinutes;
+            float valorTotal = 0;
+
+            for (int i = 0; i < minutosTotais; i++)
+            {
+                var minutoAtual = DataEntrada.AddMinutes(i);
+                valorTotal += ObterTarifaPorMinuto(minutoAtual, tarifasEspeciais, valorPadrao.Valor);
+            }
+
+            return valorTotal;
+        }
+
+
     }
 }

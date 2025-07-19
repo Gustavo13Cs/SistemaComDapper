@@ -1,42 +1,85 @@
-@using Estacionamento.Models
-@model IEnumerable<ValorDoMinuto>
 @{
-    ViewData["Title"] = "Valor do minuto";
+    ViewData["Title"] = "Tarifas";
 }
+<div class="container py-5">
+    <h1 class="text-info fw-bold text-center mb-3">Tarifas do Estacionamento</h1>
+    <p class="text-center text-muted">A <strong>Tarifa Padrão</strong> é usada quando não há tarifa especial ativa.</p>
 
-<div class="text-center">
-    <h1 class="display-4 fw-bold">Valor do minuto</h1>
-     <a class="btn btn-primary btn-novo" asp-area="" asp-controller="ValorDoMinuto" asp-action="Novo">Novo</a></li>
-</div>
+    <div class="row">
+        <!-- Tarifa Padrão -->
+        <div class="col-md-6">
+            <div class="card bg-dark text-white shadow">
+                <div class="card-header bg-info text-dark fw-bold">Tarifa Padrão</div>
+                <div class="card-body">
+                    <table class="table table-bordered text-white">
+                        <thead class="table-light text-dark">
+                            <tr>
+                                <th>Minutos</th>
+                                <th>Valor</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (ViewBag.TarifaPadrao != null)
+                            {
+                                <tr>
+                                    <td>@ViewBag.TarifaPadrao.Minutos</td>
+                                    <td>R$ @ViewBag.TarifaPadrao.Valor.ToString("F2")</td>
+                                    <td>
+                                        <a asp-action="Editar" asp-route-id="@ViewBag.TarifaPadrao.Id" class="btn btn-warning btn-sm">Alterar</a>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr><td colspan="3" class="text-center">Nenhuma tarifa cadastrada.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-<div class="table-responsive">
-    <table class="table table-hover table-bordered text-center align-middle">
-        <thead class="table-dark">
-            <tr>
-                <th>Id</th>
-                <th>Minutos</th>
-                <th>Valor</th>
-                <th></th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach(var item in Model) {
-                <tr>
-                    <td>@item.Id</td>
-                    <td>@item.Minutos</td>
-                    <td>@item.Valor.ToString("C2", new System.Globalization.CultureInfo("pt-BR"))</td>
-                    <td>
-                        <form onsubmit="return confirm('Confirma?')" asp-route-id="@item.Id" asp-action="Apagar" asp-controller="ValorDoMinuto" method="post">
-                            <input type="hidden" name="id" value="">
-                             <button type="submit" class="btn btn-danger">Excluir</button>
-                        </form>
-                    </td>
-                    <td>
-                        <a class="btn btn-warning" asp-route-id="@item.Id" asp-action="Editar" asp-controller="ValorDoMinuto">Alterar</a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+        <!-- Tarifas Especiais -->
+        <div class="col-md-6">
+            <div class="card bg-dark text-white shadow">
+                <div class="card-header bg-warning text-dark fw-bold d-flex justify-content-between align-items-center">
+                    Tarifas Especiais
+                    <a asp-controller="TarifasEspeciais" asp-action="Novo" class="btn btn-sm btn-primary">+ Nova</a>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered text-white">
+                        <thead class="table-light text-dark">
+                            <tr>
+                                <th>Início</th>
+                                <th>Fim</th>
+                                <th>Valor/Min</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in ViewBag.TarifasEspeciais)
+                            {
+                                <tr>
+                                    <td>@item.HoraInicio</td>
+                                    <td>@item.HoraFim</td>
+                                    <td>R$ @item.ValorPorMinuto.ToString("F2")</td>
+                                    <td>
+                                        <a asp-controller="TarifasEspeciais" asp-action="Editar" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Editar</a>
+                                        <form asp-controller="TarifasEspeciais" asp-action="Apagar" asp-route-id="@item.Id" method="post" style="display:inline;">
+                                            <button class="btn btn-sm btn-danger">Excluir</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                            if (!ViewBag.TarifasEspeciais.Any())
+                            {
+                                <tr><td colspan="4" class="text-center">Nenhuma tarifa especial cadastrada.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

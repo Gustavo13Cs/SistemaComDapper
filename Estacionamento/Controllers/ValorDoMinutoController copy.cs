@@ -11,17 +11,24 @@ namespace Estacionamento.Controllers
     public class ValorDoMinutoController : Controller
     {
         private readonly IRepositorio<ValorDoMinuto> _repo;
+        private readonly IDbConnection _cnn;
 
-        public ValorDoMinutoController(IRepositorio<ValorDoMinuto> repo)
+        public ValorDoMinutoController(IDbConnection cnn, IRepositorio<ValorDoMinuto> repo)
         {
             _repo = repo;
+            _cnn = cnn;
         }
 
         [HttpGet("")]
         public IActionResult Index()
         {
-            var valores = _repo.ObterTodos();
-            return View(valores);
+            var tarifaPadrao = _cnn.QueryFirstOrDefault<ValorDoMinuto>("SELECT * FROM Valores ORDER BY Id DESC LIMIT 1");
+            var tarifasEspeciais = _cnn.Query<TarifaEspecial>("SELECT * FROM TarifasEspeciais ORDER BY HoraInicio").ToList();
+
+            ViewBag.TarifaPadrao = tarifaPadrao;
+            ViewBag.TarifasEspeciais = tarifasEspeciais;
+
+            return View();
         }
 
         [HttpGet("novo")]

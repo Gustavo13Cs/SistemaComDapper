@@ -4,6 +4,7 @@ using Dapper;
 using Estacionamento.DTO;
 using Estacionamento.Models;
 using Estacionamento.Repositorios;
+using Estacionamento.Servicos;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -15,14 +16,16 @@ namespace Estacionamento.Controllers
         private readonly IDbConnection _cnn;
         private readonly IRepositorio<Ticket> _repo;
         private readonly IRepositorio<Vaga> _repoVaga;
+        private readonly EmailService _emailService;
 
         private readonly IRepositorio<HistoricoVagas> _historicoRepo;
 
-        public TicketsController(IDbConnection cnn)
+        public TicketsController(IDbConnection cnn, EmailService emailService)
         {
             _repo = new RepositorioDapper<Ticket>(cnn);
             _repoVaga = new RepositorioDapper<Vaga>(cnn);
             _historicoRepo = new RepositorioDapper<HistoricoVagas>(cnn);
+            _emailService = emailService;
             _cnn = cnn;
         }
         [HttpGet("")]
@@ -82,20 +85,28 @@ namespace Estacionamento.Controllers
 
             if (ticket != null)
             {
-                var valorDoMinuto = _cnn.QueryFirstOrDefault<ValorDoMinuto>("Select * From valores order by id desc limit 1");
-                ticket.Pago(valorDoMinuto);
+                var valorDoMinuto = _cnn.QueryFirstOrDefault<ValorDoMinuto>("SELECT * FROM valores ORDER BY id DESC LIMIT 1");
+                var tarifasEspeciais = _cnn.Query<TarifaEspecial>("SELECT * FROM TarifasEspeciais").ToList();
+
+                ticket.DataSaida = DateTime.Now;
+                ticket.Valor = ticket.CalcularValor(valorDoMinuto, tarifasEspeciais);
+
                 _repo.Atualizar(ticket);
                 alteraStatusVaga(ticket.VagaId, false);
-            }
-            // Atualiza a vaga relacionada
-            var vaga = _repoVaga.ObterPorId(ticket.VagaId);
-            vaga.Ocupada = false;
-            _repoVaga.Atualizar(vaga);
-            RegistrarHistorico(ticket);
 
-            TempData["Success"] = "Ticket pago com sucesso!";
+                var vaga = _repoVaga.ObterPorId(ticket.VagaId);
+                vaga.Ocupada = false;
+                _repoVaga.Atualizar(vaga);
+
+                RegistrarHistorico(ticket);
+                EnviarComprovantePorEmail(ticket);
+
+                TempData["Success"] = "Ticket pago com sucesso!";
+            }
+            
             return Redirect("/tickets");
         }
+
 
         [HttpPost("{id}/apagar")]
         public async Task<IActionResult> Apagar([FromRoute] int id)
@@ -202,6 +213,50 @@ namespace Estacionamento.Controllers
 
             _cnn.Execute(sql, historicoDTO);
         }
+
+        private void EnviarComprovantePorEmail(Ticket ticket)
+        {
+            var cliente = ticket.Veiculo.Cliente;
+            var emailCliente = cliente.Email;
+
+            string assunto = "Comprovante de Pagamento - Estacionamento";
+            string corpo = $@"
+            <div style='font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;'>
+                <div style='max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 8px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);'>
+                    <h2 style='color: #28a745; border-bottom: 1px solid #e0e0e0; padding-bottom: 10px;'>✅ Pagamento Confirmado!</h2>
+                    <p style='font-size: 16px;'>Olá, <strong>{cliente.Nome}</strong>,</p>
+                    <p style='font-size: 15px; color: #333;'>Seu ticket <strong>#{ticket.Id}</strong> foi pago com sucesso. Aqui estão os detalhes:</p>
+
+                    <table style='width: 100%; font-size: 15px; margin-top: 20px; border-collapse: collapse;'>
+                        <tr>
+                            <td style='padding: 8px; font-weight: bold;'>Veículo:</td>
+                            <td style='padding: 8px;'>{ticket.Veiculo.Placa} - {ticket.Veiculo.Modelo}</td>
+                        </tr>
+                        <tr style='background-color: #f5f5f5;'>
+                            <td style='padding: 8px; font-weight: bold;'>Entrada:</td>
+                            <td style='padding: 8px;'>{ticket.DataEntrada:dd/MM/yyyy HH:mm}</td>
+                        </tr>
+                        <tr>
+                            <td style='padding: 8px; font-weight: bold;'>Saída:</td>
+                            <td style='padding: 8px;'>{ticket.DataSaida:dd/MM/yyyy HH:mm}</td>
+                        </tr>
+                        <tr style='background-color: #f5f5f5;'>
+                            <td style='padding: 8px; font-weight: bold;'>Valor:</td>
+                            <td style='padding: 8px;'>R$ {ticket.Valor?.ToString("F2")}</td>
+                        </tr>
+                    </table>
+
+                    <p style='margin-top: 30px; font-size: 14px; color: #666;'>Obrigado por utilizar nosso estacionamento. Esperamos vê-lo novamente em breve!</p>
+                    
+                    <hr style='margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;'/>
+                    <p style='font-size: 12px; color: #999;'>Estacionamento Dapper - Sistema de Gestão Inteligente 🚗</p>
+                </div>
+            </div>";
+
+
+            _emailService.Enviar(emailCliente, assunto, corpo);
+        }
+
 
     }
 }

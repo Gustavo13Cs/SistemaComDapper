@@ -1,5 +1,6 @@
 using System.Data;
 using Estacionamento.Repositorios;
+using Estacionamento.Servicos;
 using MySqlConnector;
 
 
@@ -13,6 +14,7 @@ builder.Services.AddScoped<IDbConnection>((sp) =>
 new MySqlConnection(connectionString));
 
 builder.Services.AddScoped(typeof(IRepositorio<>), typeof(RepositorioDapper<>));
+builder.Services.AddSingleton<EmailService>();
 
 
 // Add services to the container.
