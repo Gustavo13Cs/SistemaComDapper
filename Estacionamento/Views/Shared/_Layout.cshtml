@@ -45,6 +45,11 @@
                     <li class="nav-item"></li>
                         <a class="nav-link" asp-controller="HistoricoVagas" asp-action="Index"><i class="bi bi-signpost"></i> Historico</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" asp-controller="Dashboard" asp-action="Index">
+                            <i class="bi bi-graph-up"></i> Dashboard
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
@@ -56,7 +61,37 @@
         </main>
     </div>
 
+    <button id="botToggle" class="btn btn-info rounded-circle shadow" style="position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; z-index: 1000;"></button>
+     🤖
+    </button>
+
+    <div id="chatBotBox" class="card shadow-lg" style="position: fixed; bottom: 100px; right: 25px; width: 300px; display: none; z-index: 1000;">
+    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+        <span>Assistente do Sistema</span>
+        <button class="btn btn-sm btn-light" onclick="toggleBot()">✖</button>
+    </div>
+    <div class="card-body" id="chatLog" style="height: 250px; overflow-y: auto; font-size: 0.9rem;">
+        <div class="mb-3">
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                <button type="button" class="btn btn-sm btn-outline-light text-white bg-dark border-info" onclick="enviarAtalho('Quantas vagas disponíveis?')">📍 Vagas disponíveis</button>
+                <button type="button" class="btn btn-sm btn-outline-light text-white bg-dark border-warning" onclick="enviarAtalho('Quantos tickets ativos?')">🎫 Tickets ativos</button>
+                <button type="button" class="btn btn-sm btn-outline-light text-white bg-dark border-success" onclick="enviarAtalho('Qual a tarifa atual?')">💰 Tarifa atual</button>
+                <button type="button" class="btn btn-sm btn-outline-light text-white bg-dark border-primary" onclick="enviarAtalho('Qual a receita de hoje?')">📈 Receita do dia</button>
+            </div>
+      </div>
+    </div>
+    <div class="card-footer p-2">
+            <form id="chatForm" onsubmit="return enviarPergunta()">
+                <div class="input-group">
+                    <input type="text" id="userInput" class="form-control" placeholder="Digite sua pergunta..." required />
+                    <button type="submit" class="btn btn-info">▶</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Scripts -->
+    <script src="~/js/chatbot.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

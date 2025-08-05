@@ -1,0 +1,72 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var filtro = ViewBag.Filtro ?? "hoje";
+}
+
+<div class="container py-4">
+    <h1 class="text-info fw-bold mb-4 text-center">Dashboard - Estacionamento</h1>
+
+    <form method="get" class="text-center mb-4">
+        <label class="me-2 fw-semibold">Filtrar por:</label>
+        <select name="filtro" class="form-select d-inline w-auto" onchange="this.form.submit()">
+            <option value="hoje" selected="@(filtro == "hoje" ? "selected" : null)">Hoje</option>
+            <option value="semana" selected="@(filtro == "semana" ? "selected" : null)">Semana</option>
+            <option value="mes" selected="@(filtro == "mes" ? "selected" : null)">Mês</option>
+        </select>
+    </form>
+
+    <div class="text-end mb-4">
+        <a class="btn btn-outline-danger me-2" asp-controller="Dashboard" asp-action="ExportarPdf" asp-route-filtro="@ViewBag.Filtro">
+            <i class="bi bi-file-earmark-pdf"></i> Exportar PDF
+        </a>
+        <a class="btn btn-outline-success" asp-controller="Dashboard" asp-action="ExportarExcel" asp-route-filtro="@ViewBag.Filtro">
+            <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+        </a>
+    </div>
+
+    <div class="row text-white">
+        <div class="col-md-3">
+            <div class="card bg-light text-center mb-3 shadow">
+                <div class="card-header">Vagas Totais</div>
+                <div class="card-body fs-4 fw-bold">@ViewBag.TotalVagas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-center mb-3 shadow">
+                <div class="card-header">Vagas Ocupadas</div>
+                <div class="card-body fs-4 fw-bold">@ViewBag.VagasOcupadas</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-center mb-3 shadow">
+                <div class="card-header">Tickets Ativos</div>
+                <div class="card-body fs-4 fw-bold">@ViewBag.TicketsAtivos</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-center mb-3 shadow">
+                <div class="card-header">Receita (@filtro)</div>
+                <div class="card-body fs-4 fw-bold">
+                    R$ @ViewBag.Receita.ToString("F2")
+                </div>
+            </div>
+        </div>
+        <div class="mt-5">
+            <h4 class="text-info text-center mb-4">Receita por Dia</h4>
+            <canvas id="graficoReceita" height="100"></canvas>
+        </div>
+    </div>
+
+    @section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Passa os dados do C# para o JS externo
+        window.dashboardLabels = @Html.Raw(Json.Serialize(ViewBag.Datas));
+        window.dashboardValores = @Html.Raw(Json.Serialize(ViewBag.Valores));
+    </script>
+
+    <script src="~/js/dashboard.js"></script>
+}
+
+</div>

@@ -1,0 +1,39 @@
+#chatBotBox {
+    background-color: #1c1f2e;
+    color: #fff;
+    border: 1px solid #444;
+    border-radius: 10px;
+}
+
+#chatBotBox .card-header {
+    background-color: #111827;
+    border-bottom: 1px solid #333;
+    font-weight: bold;
+}
+
+#chatBotBox .card-body {
+    background-color: #1f2336;
+}
+
+#chatBotBox .card-footer {
+    background-color: #111827;
+}
+
+#chatBotBox input.form-control {
+    background-color: #2d3144;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+#chatBotBox input.form-control::placeholder {
+    color: #bbb;
+}
+
+#chatBotBox .btn-info {
+    background-color: #00bcd4;
+    border: none;
+}
+
+#chatBotBox .btn-info:hover {
+    background-color: #00acc1;
+}
