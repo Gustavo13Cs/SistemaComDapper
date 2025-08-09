@@ -1,12 +1,14 @@
 @using Estacionamento.Models
 @model IEnumerable<Ticket>
+
 @{
-    ViewData["Title"] = "Ticket";
+    ViewData["Title"] = "Tickets";
+    var tarifas = ViewBag.Tarifas as List<Tarifa>; // recebida do controller
 }
 
-<div class="text-center">
+<div class="text-center mb-4">
     <h1 class="display-4 fw-bold">Tickets</h1>
-     <a class="btn btn-primary btn-novo" asp-area="" asp-controller="Tickets" asp-action="Novo">Novo</a></li>
+    <a class="btn btn-primary btn-novo" asp-controller="Tickets" asp-action="Novo">Novo</a>
 </div>
 
 <div class="table-responsive">
@@ -19,15 +21,19 @@
                 <th>Modelo</th>
                 <th>Marca</th>
                 <th>Local</th>
-                <th>Data De Entrada</th>
+                <th>Data de Entrada</th>
                 <th>Valor Total</th>
-                <th>Data De Saida</th>
-                <th></th>
-                <th></th>
+                <th>Data de Saída</th>
+                <th>Ações</th>
             </tr>
         </thead>
         <tbody>
-            @foreach(var item in Model) {
+            @foreach (var item in Model)
+            {
+                var valorFinal = item.DataSaida.HasValue
+                    ? item.Valor
+                    : (tarifas != null ? item.CalcularValor(tarifas) : 0);
+
                 <tr>
                     <td>@item.Id</td>
                     <td>@item.Veiculo.Cliente.Nome</td>
@@ -35,26 +41,20 @@
                     <td>@item.Veiculo.Marca</td>
                     <td>@item.Veiculo.Modelo</td>
                     <td>@item.Vaga.CodigoLocalizacao</td>
-                    <td>@item.DataEntrada.ToString("dd/MM/yyy HH:mm")</td>
+                    <td>@item.DataEntrada.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@valorFinal?.ToString("C", new System.Globalization.CultureInfo("pt-BR"))</td>
+                    <td>@item.DataSaida?.ToString("dd/MM/yyyy HH:mm")</td>
                     <td>
-                        @{
-                            var valorFinal = item.DataSaida.HasValue
-                                ? item.Valor
-                                : item.ValorTotal(ViewBag.ValorDoMinuto, DateTime.Now);
-                        }
-                        @valorFinal?.ToString("C", new System.Globalization.CultureInfo("pt-BR"))
-                    </td>
-                    <td>@item.DataSaida?.ToString("dd/MM/yyy HH:mm")</td>
-                    <td>
-                        <form onsubmit="return confirm('Confirma?')" asp-route-id="@item.Id" asp-action="Apagar" asp-controller="Tickets" method="post">
-                            <input type="hidden" name="id" value="">
-                             <button type="submit" class="btn btn-danger">Excluir</button>
-                        </form>
-                    </td>
-                    <td>
-                        <form onsubmit="return confirm('Confirma Pagamento?')" asp-route-id="@item.Id" asp-action="Pago" asp-controller="Tickets" method="post">
-                            <button class="btn btn-success" asp-route-id="@item.Id" asp-action="Pago" asp-controller="Tickets">R$ Pago</button>
-                        </form>
+                        <div class="d-flex gap-2 justify-content-center">
+                            <form onsubmit="return confirm('Confirma exclusão?')" 
+                                  asp-route-id="@item.Id" asp-action="Apagar" asp-controller="Tickets" method="post">
+                                <button type="submit" class="btn btn-danger">Excluir</button>
+                            </form>
+                            <form onsubmit="return confirm('Confirma pagamento?')" 
+                                  asp-route-id="@item.Id" asp-action="Pago" asp-controller="Tickets" method="post">
+                                <button type="submit" class="btn btn-success">R$ Pago</button>
+                            </form>
+                        </div>
                     </td>
                 </tr>
             }

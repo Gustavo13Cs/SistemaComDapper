@@ -1,0 +1,73 @@
+@model Estacionamento.Models.Tarifa
+@{
+    ViewData["Title"] = "Nova Tarifa";
+
+    var tiposTarifa = new List<string> { "Normal", "Especial" };
+
+    var dias = new List<(int? valor, string nome)>
+    {
+        (null, "Todos"),
+        (0, "Domingo"),
+        (1, "Segunda"),
+        (2, "Terça"),
+        (3, "Quarta"),
+        (4, "Quinta"),
+        (5, "Sexta"),
+        (6, "Sábado")
+    };
+}
+
+<h2>Nova Tarifa</h2>
+<form method="post" action="/tarifas/criar">
+    <div class="form-group">
+        <label for="TipoTarifa">Tipo de Tarifa</label>
+        <select name="TipoTarifa" class="form-control" required>
+            @foreach (var tipo in tiposTarifa)
+            {
+                if (Model?.TipoTarifa == tipo)
+                {
+                    @: <option value="@tipo" selected="selected">@tipo</option>
+                }
+                else
+                {
+                    @: <option value="@tipo">@tipo</option>
+                }
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="Valor">Valor</label>
+        <input type="number" step="0.01" name="Valor" value="@(Model?.Valor ?? 0)" class="form-control" required />
+    </div>
+
+    <div class="form-group">
+        <label for="HoraInicio">Hora Início (apenas para Especial)</label>
+        <input type="time" name="HoraInicio" value="@(Model?.HoraInicio?.ToString(@"hh\:mm"))" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="HoraFim">Hora Fim (apenas para Especial)</label>
+        <input type="time" name="HoraFim" value="@(Model?.HoraFim?.ToString(@"hh\:mm"))" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label for="DiaSemana">Dia da Semana (opcional)</label>
+        <select name="DiaSemana" class="form-control">
+            @foreach (var dia in dias)
+            {
+                if (Model?.DiaSemana == dia.valor)
+                {
+                    @: <option value="@(dia.valor?.ToString() ?? "")" selected="selected">@dia.nome</option>
+                }
+                else
+                {
+                    @: <option value="@(dia.valor?.ToString() ?? "")">@dia.nome</option>
+                }
+            }
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-success mt-3">Salvar</button>
+    <a href="/tarifas" class="btn btn-secondary mt-3">Voltar</a>
+</form>

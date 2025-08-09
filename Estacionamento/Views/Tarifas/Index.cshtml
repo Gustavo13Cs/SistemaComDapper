@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Tarifas";
+    var tarifaPadrao = ViewBag.TarifaPadrao as Estacionamento.Models.Tarifa;
+    var tarifasEspeciais = ViewBag.TarifasEspeciais as List<Estacionamento.Models.Tarifa>;
+}
+
+<h2>Tarifa Normal</h2>
+@if (tarifaPadrao != null)
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Valor</th>
+                <th>Data Criação</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>@tarifaPadrao.Valor.ToString("C")</td>
+                <td>@tarifaPadrao.DataCriacao.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    <a href="/tarifas/@tarifaPadrao.Id/editar" class="btn btn-sm btn-warning">Editar</a>
+                    <form method="post" action="/tarifas/@tarifaPadrao.Id/apagar" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Não há tarifa normal cadastrada.</p>
+}
+
+<h2>Tarifas Especiais</h2>
+<a href="/tarifas/novo" class="btn btn-primary mb-3">Nova Tarifa</a>
+@if (tarifasEspeciais != null && tarifasEspeciais.Any())
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Hora Início</th>
+                <th>Hora Fim</th>
+                <th>Valor</th>
+                <th>Dia da Semana</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var tarifa in tarifasEspeciais)
+        {
+            <tr>
+                <td>@(tarifa.HoraInicio?.ToString(@"hh\:mm"))</td>
+                <td>@(tarifa.HoraFim?.ToString(@"hh\:mm"))</td>
+                <td>@tarifa.Valor.ToString("C")</td>
+                <td>
+                    @if (tarifa.DiaSemana.HasValue)
+                    {
+                        @System.Globalization.CultureInfo.GetCultureInfo("pt-BR").DateTimeFormat.GetDayName((DayOfWeek)tarifa.DiaSemana.Value)
+                    }
+                    else
+                    {
+                        @:Todos
+                    }
+                </td>
+                <td>
+                    <a href="/tarifas/@tarifa.Id/editar" class="btn btn-sm btn-warning">Editar</a>
+                    <form method="post" action="/tarifas/@tarifa.Id/apagar" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>Não há tarifas especiais cadastradas.</p>
+}

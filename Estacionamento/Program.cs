@@ -16,6 +16,9 @@ new MySqlConnection(connectionString));
 builder.Services.AddScoped(typeof(IRepositorio<>), typeof(RepositorioDapper<>));
 builder.Services.AddSingleton<EmailService>();
 
+builder.Services.AddScoped<TarifaService>();
+
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();

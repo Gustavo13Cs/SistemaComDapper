@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
-using System.Threading.Tasks;
 using Estacionamento.Repositorios;
 
 namespace Estacionamento.Models
@@ -11,67 +10,57 @@ namespace Estacionamento.Models
     public class Ticket
     {
         [IgnoreInDapper]
-        public int Id { get; set; } = default;
-        public DateTime DataEntrada { get; set; } = default!;
+        public int Id { get; set; }
+        public DateTime DataEntrada { get; set; }
         public DateTime? DataSaida { get; set; }
-        public float? Valor { get; set; } = default;
+        public float? Valor { get; set; }
 
         // FKs
-        public int VeiculoId { get; set; } = default!;
+        public int VeiculoId { get; set; }
         [IgnoreInDapper]
-        public Veiculo Veiculo { get; set; } = default!;
+        public Veiculo Veiculo { get; set; }
 
-        public int VagaId { get; set; } = default!;
+        public int VagaId { get; set; }
         [IgnoreInDapper]
-        public Vaga Vaga { get; set; } = default!;
+        public Vaga Vaga { get; set; }
 
-        public int? ValoresId { get; set; }
-        [IgnoreInDapper]
-        public ValorDoMinuto? ValorInfo { get; set; }
-
-
-        public float ValorTotal(ValorDoMinuto valorDoMinuto, DateTime dataSaida)
-        {
-            var valorMinuto = valorDoMinuto.Valor / valorDoMinuto.Minutos;
-            TimeSpan diferenca = dataSaida - this.DataEntrada;
-            int minutos = (int)diferenca.TotalMinutes;
-
-            return minutos * valorMinuto;
-        }
-
-        public void Pago(ValorDoMinuto valorDoMinuto)
-        {
-            var agora = DateTime.Now;
-            this.Valor = this.ValorTotal(valorDoMinuto, agora);
-            this.DataSaida = agora;
-        }
-
-        private float ObterTarifaPorMinuto(DateTime minuto, List<TarifaEspecial> tarifas, float valorPadrao)
-        {
-            var horaDoMinuto = minuto.TimeOfDay;
-
-            var tarifa = tarifas.FirstOrDefault(t =>
-                horaDoMinuto >= t.HoraInicio && horaDoMinuto <= t.HoraFim);
-
-            return tarifa?.ValorPorMinuto ?? valorPadrao;
-        }
-
-        public float CalcularValor(ValorDoMinuto valorPadrao, List<TarifaEspecial> tarifasEspeciais)
+        /// <summary>
+        /// Calcula o valor total usando lista de tarifas unificada.
+        /// "Normal" é o valor base e "Especial" substitui se o minuto cair no intervalo.
+        /// </summary>
+        public float CalcularValor(List<Tarifa> tarifas)
         {
             if (DataSaida == null) return 0;
 
             int minutosTotais = (int)(DataSaida.Value - DataEntrada).TotalMinutes;
             float valorTotal = 0;
 
+            // Tarifa normal como valor padrão
+            var tarifaNormal = tarifas.FirstOrDefault(t => t.TipoTarifa == "Normal");
+            var valorPadrao = tarifaNormal != null ? (float)tarifaNormal.Valor : 0;
+
+            // Lista de tarifas especiais
+            var tarifasEspeciais = tarifas
+                .Where(t => t.TipoTarifa == "Especial")
+                .ToList();
+
             for (int i = 0; i < minutosTotais; i++)
             {
                 var minutoAtual = DataEntrada.AddMinutes(i);
-                valorTotal += ObterTarifaPorMinuto(minutoAtual, tarifasEspeciais, valorPadrao.Valor);
+                var horaDoMinuto = minutoAtual.TimeOfDay;
+
+                var tarifaEspecial = tarifasEspeciais
+                    .FirstOrDefault(t =>
+                        t.HoraInicio.HasValue &&
+                        t.HoraFim.HasValue &&
+                        horaDoMinuto >= t.HoraInicio.Value &&
+                        horaDoMinuto <= t.HoraFim.Value
+                    );
+
+                valorTotal += tarifaEspecial != null ? (float)tarifaEspecial.Valor : valorPadrao;
             }
 
             return valorTotal;
         }
-
-
     }
 }
