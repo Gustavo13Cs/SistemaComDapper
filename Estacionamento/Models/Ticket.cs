@@ -28,7 +28,7 @@ namespace Estacionamento.Models
         /// Calcula o valor total usando lista de tarifas unificada.
         /// "Normal" é o valor base e "Especial" substitui se o minuto cair no intervalo.
         /// </summary>
-        public float CalcularValor(List<Tarifa> tarifas)
+        public float CalcularValor(List<Tarifas> tarifas)
         {
             if (DataSaida == null) return 0;
 

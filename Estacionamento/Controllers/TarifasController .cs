@@ -10,10 +10,10 @@ namespace Estacionamento.Controllers
     [Route("/tarifas")]
     public class TarifasController : Controller
     {
-        private readonly IRepositorio<Tarifa> _repo;
+        private readonly IRepositorio<Tarifas> _repo;
         private readonly IDbConnection _cnn;
 
-        public TarifasController(IDbConnection cnn, IRepositorio<Tarifa> repo)
+        public TarifasController(IDbConnection cnn, IRepositorio<Tarifas> repo)
         {
             _repo = repo;
             _cnn = cnn;
@@ -22,7 +22,7 @@ namespace Estacionamento.Controllers
         [HttpGet("")]
         public IActionResult Index()
         {
-            var tarifas = _cnn.Query<Tarifa>("SELECT * FROM Tarifas ORDER BY TipoTarifa DESC, HoraInicio").ToList();
+            var tarifas = _cnn.Query<Tarifas>("SELECT * FROM Tarifas ORDER BY TipoTarifa DESC, HoraInicio").ToList();
 
             var tarifaPadrao = tarifas.FirstOrDefault(t => t.TipoTarifa == "Normal");
             var tarifasEspeciais = tarifas.Where(t => t.TipoTarifa == "Especial").ToList();
@@ -40,7 +40,7 @@ namespace Estacionamento.Controllers
         }
 
         [HttpPost("criar")]
-        public async Task<IActionResult> Criar([FromForm] Tarifa tarifa)
+        public async Task<IActionResult> Criar([FromForm] Tarifas tarifa)
         {
             _repo.Inserir(tarifa);
             return Redirect("/tarifas");
@@ -67,7 +67,7 @@ namespace Estacionamento.Controllers
         }
 
         [HttpPost("{id}/alterar")]
-        public async Task<IActionResult> Alterar([FromRoute] int id, [FromForm] Tarifa tarifa)
+        public async Task<IActionResult> Alterar([FromRoute] int id, [FromForm] Tarifas tarifa)
         {
             tarifa.Id = id;
             _repo.Atualizar(tarifa);
@@ -75,9 +75,9 @@ namespace Estacionamento.Controllers
         }
 
         // Método para pegar a tarifa ativa
-        public Tarifa ObterTarifaAtual()
+        public Tarifas ObterTarifaAtual()
         {
-            var tarifas = _cnn.Query<Tarifa>("SELECT * FROM Tarifas").ToList();
+            var tarifas = _cnn.Query<Tarifas>("SELECT * FROM Tarifas").ToList();
             var agora = DateTime.Now.TimeOfDay;
 
             var tarifaEspecial = tarifas

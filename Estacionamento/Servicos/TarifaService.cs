@@ -19,9 +19,9 @@ namespace Estacionamento.Servicos
         /// <summary>
         /// Retorna todas as tarifas ordenadas (Normal e depois Especiais por hora de início).
         /// </summary>
-        public List<Tarifa> ObterTodas()
+        public List<Tarifas> ObterTodas()
         {
-            return _cnn.Query<Tarifa>(
+            return _cnn.Query<Tarifas>(
                 "SELECT * FROM Tarifas ORDER BY TipoTarifa DESC, HoraInicio"
             ).ToList();
         }
@@ -29,7 +29,7 @@ namespace Estacionamento.Servicos
         /// <summary>
         /// Retorna a tarifa ativa no momento (Especial se aplicável, senão Normal).
         /// </summary>
-        public Tarifa ObterTarifaAtual()
+        public Tarifas ObterTarifaAtual()
         {
             var tarifas = ObterTodas();
             var agora = DateTime.Now.TimeOfDay;
@@ -45,7 +45,7 @@ namespace Estacionamento.Servicos
 
             var tarifaNormal = tarifas.FirstOrDefault(t => t.TipoTarifa == "Normal");
 
-            return tarifaEspecial ?? tarifaNormal ?? new Tarifa
+            return tarifaEspecial ?? tarifaNormal ?? new Tarifas
             {
                 TipoTarifa = "Normal",
                 Valor = 0,

@@ -2,7 +2,7 @@ using System;
 
 namespace Estacionamento.Models
 {
-    public class Tarifa
+    public class Tarifas
     {
         public int Id { get; set; }
         /// <summary>
