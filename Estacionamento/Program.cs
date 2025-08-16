@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 using Estacionamento.Repositorios;
 using Estacionamento.Servicos;
 using MySqlConnector;
@@ -6,6 +7,9 @@ using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var cultureInfo = new CultureInfo("pt-BR");
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 // registra DI para conexão Dapper/MySQL
 var connectionString = builder.Configuration.GetConnectionString("Default");
