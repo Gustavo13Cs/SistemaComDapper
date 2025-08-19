@@ -1,39 +1,64 @@
-const toggleBot = () => {
-        const box = document.getElementById('chatBotBox');
-        box.style.display = box.style.display === 'none' ? 'block' : 'none';
-    };
+document.addEventListener("DOMContentLoaded", function () {
+    const chatbotToggle = document.getElementById("chatbot-toggle");
+    const chatbotWindow = document.getElementById("chatbot-window");
+    const chatbotMessages = document.getElementById("chatbot-messages");
+    const chatbotInput = document.getElementById("chatbot-input");
+    const chatbotSend = document.getElementById("chatbot-send");
+    const quickButtons = document.getElementById("chatbot-quick-buttons");
 
-    document.getElementById('botToggle').addEventListener('click', toggleBot);
+    chatbotToggle.addEventListener("click", function () {
+        chatbotWindow.style.display = chatbotWindow.style.display === "none" ? "flex" : "none";
+    });
 
-    const enviarPergunta = () => {
-        const input = document.getElementById('userInput');
-        const pergunta = input.value;
-        const chatLog = document.getElementById('chatLog');
+    chatbotSend.addEventListener("click", sendMessage);
+    chatbotInput.addEventListener("keypress", function (e) {
+        if (e.key === "Enter") sendMessage();
+    });
 
-        // Mostra pergunta do usuário
-        chatLog.innerHTML += `<div class="text-end"><span class="badge bg-primary mb-2">${pergunta}</span></div>`;
+    function sendMessage(text = null) {
+        const message = text || chatbotInput.value.trim();
+        if (message === "") return;
 
-        // Chama backend (a gente cria o endpoint na próxima etapa)
-        fetch('/chatbot/responder?pergunta=' + encodeURIComponent(pergunta))
-            .then(res => res.text())
-            .then(resposta => {
-                chatLog.innerHTML += `<div class="text-start"><span class="badge bg-secondary mb-2">${resposta}</span></div>`;
-                chatLog.scrollTop = chatLog.scrollHeight;
+        addMessage(message, "user");
+        chatbotInput.value = "";
+
+        fetch("/api/chatbot/perguntar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ texto: message })
+        })
+            .then(res => res.json())
+            .then(data => {
+                addMessage(data.resposta, "bot");
+            })
+            .catch(err => {
+                addMessage("Erro ao conectar com o bot 😢", "bot");
+                console.error(err);
             });
+    }
 
-        input.value = '';
-        return false;
-    };
+    function addMessage(text, sender) {
+        const div = document.createElement("div");
+        div.classList.add("chatbot-message", sender);
+        div.textContent = text;
+        chatbotMessages.appendChild(div);
+        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+    }
 
-    function enviarAtalho(pergunta) {
-    const chatLog = document.getElementById('chatLog');
-    
-    chatLog.innerHTML += `<div class="text-end"><span class="badge bg-primary mb-2">${pergunta}</span></div>`;
+    // 🔘 Botões rápidos
+    const perguntasRapidas = [
+        "Tickets ativos",
+        "Clientes em atraso",
+        "Horário de pico",
+        "Tempo médio",
+        "Receita do mês",
+        "Histórico vaga"
+    ];
 
-    fetch('/chatbot/responder?pergunta=' + encodeURIComponent(pergunta))
-        .then(res => res.text())
-        .then(resposta => {
-            chatLog.innerHTML += `<div class="text-start"><span class="badge bg-secondary mb-2">${resposta}</span></div>`;
-            chatLog.scrollTop = chatLog.scrollHeight;
-        });
-}
+    perguntasRapidas.forEach(p => {
+    const btn = document.createElement("button");
+    btn.textContent = p;
+    btn.onclick = () => sendMessage(p);
+    quickButtons.appendChild(btn);
+});
+});
