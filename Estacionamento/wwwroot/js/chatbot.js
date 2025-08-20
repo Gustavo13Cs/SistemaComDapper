@@ -1,64 +1,67 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const chatbotToggle = document.getElementById("chatbot-toggle");
-    const chatbotWindow = document.getElementById("chatbot-window");
-    const chatbotMessages = document.getElementById("chatbot-messages");
-    const chatbotInput = document.getElementById("chatbot-input");
-    const chatbotSend = document.getElementById("chatbot-send");
-    const quickButtons = document.getElementById("chatbot-quick-buttons");
+(() => {
+const messagesEl = document.getElementById("chatbot-messages");
+    const inputEl = document.getElementById("chatbot-input-field"); 
+    const sendBtn = document.getElementById("chatbot-send");
+    const closeBtn = document.getElementById("chatbot-close");
+    const toggleBtn = document.getElementById("chatbot-toggle");  
 
-    chatbotToggle.addEventListener("click", function () {
-        chatbotWindow.style.display = chatbotWindow.style.display === "none" ? "flex" : "none";
-    });
+// Função para adicionar mensagens na tela
+function appendMessage(sender, text) {
+    const msg = document.createElement("div");
+    msg.className = sender === "user" ? "message user" : "message bot"; // usa .message + .user/.bot
+    msg.innerText = text;
+    messagesEl.appendChild(msg);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+}
 
-    chatbotSend.addEventListener("click", sendMessage);
-    chatbotInput.addEventListener("keypress", function (e) {
-        if (e.key === "Enter") sendMessage();
-    });
+// Função para enviar mensagem ao backend
+async function sendMessage(text = null) {
+    const message = text || inputEl.value.trim();
+    if (!message) return;
 
-    function sendMessage(text = null) {
-        const message = text || chatbotInput.value.trim();
-        if (message === "") return;
+    appendMessage("user", message);
+    inputEl.value = "";
 
-        addMessage(message, "user");
-        chatbotInput.value = "";
-
-        fetch("/api/chatbot/perguntar", {
+    try {
+        const response = await fetch("/api/chatbot/perguntar", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ texto: message })
-        })
-            .then(res => res.json())
-            .then(data => {
-                addMessage(data.resposta, "bot");
-            })
-            .catch(err => {
-                addMessage("Erro ao conectar com o bot 😢", "bot");
-                console.error(err);
-            });
+            body: JSON.stringify({ pergunta: message })
+        });
+
+        const data = await response.json();
+        appendMessage("bot", data.resposta);
+    } catch (err) {
+        appendMessage("bot", "❌ Erro ao conectar com o assistente.");
     }
+}
 
-    function addMessage(text, sender) {
-        const div = document.createElement("div");
-        div.classList.add("chatbot-message", sender);
-        div.textContent = text;
-        chatbotMessages.appendChild(div);
-        chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
-    }
+// Eventos
+if (sendBtn) {
+    sendBtn.addEventListener("click", () => sendMessage());
+}
 
-    // 🔘 Botões rápidos
-    const perguntasRapidas = [
-        "Tickets ativos",
-        "Clientes em atraso",
-        "Horário de pico",
-        "Tempo médio",
-        "Receita do mês",
-        "Histórico vaga"
-    ];
+if (inputEl) {
+    inputEl.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+    });
+}
 
-    perguntasRapidas.forEach(p => {
-    const btn = document.createElement("button");
-    btn.textContent = p;
-    btn.onclick = () => sendMessage(p);
-    quickButtons.appendChild(btn);
-});
-});
+if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+        const container = document.getElementById("chatbot-container");
+        if (container) container.style.display = "none";
+    });
+}
+
+if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+        const container = document.getElementById("chatbot-container");
+        if (container) {
+            container.style.display =
+                (container.style.display === "none" || container.style.display === "")
+                ? "flex"
+                : "none";
+        }
+    });
+}})();

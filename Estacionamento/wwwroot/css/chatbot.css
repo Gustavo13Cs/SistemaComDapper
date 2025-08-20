@@ -1,27 +1,98 @@
-/* Botões rápidos estilo pílula */
-#chatbot-quick-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 8px;
-    gap: 6px;
+#chatbot-container {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 320px;
+    max-height: 480px;
+    background: #1e1e2f;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 
-#chatbot-quick-buttons button {
-    border-radius: 50px !important; /* 🔘 pílula */
-    padding: 6px 16px;
-    font-size: 0.85rem;
-    background-color: #0dcaf0;
+#chatbot-header {
+    background: #2d2d44;
     color: #fff;
+    padding: 10px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#chatbot-messages {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+    color: #fff;
+}
+
+.message {
+    margin: 5px 0;
+    padding: 8px 12px;
+    border-radius: 12px;
+    max-width: 80%;
+}
+
+.user {
+    background: #4e9af1;
+    align-self: flex-end;
+    text-align: right;
+    margin-left: auto;
+}
+
+.bot {
+    background: #3a3a55;
+    text-align: left;
+    margin-right: auto;
+}
+
+#chatbot-input {
+    display: flex;
+    border-top: 1px solid #444;
+}
+
+#chatbot-input input {
+    flex: 1;
     border: none;
-    transition: all 0.2s ease-in-out;
+    padding: 10px;
+    background: #2b2b3d;
+    color: #fff;
 }
 
-#chatbot-quick-buttons button:hover {
-    background-color: #0bb3d4;
-    transform: scale(1.05);
+#chatbot-input button {
+    background: #4e9af1;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    color: #fff;
 }
 
-#chatbot-quick-buttons button:active {
-    background-color: #099ab7;
+#chatbot-toggle {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #4e9af1;
+    border: none;
+    border-radius: 50%;
+    width: 55px;
+    height: 55px;
+    font-size: 22px;
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+.pill {
+    background: #4e9af1;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin: 3px;
+    cursor: pointer;
+    font-size: 13px;
 }

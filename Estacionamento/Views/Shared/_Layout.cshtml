@@ -11,7 +11,6 @@
 
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/ui.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/Home/home.css" asp-append-version="true" />
 
     @RenderSection("Styles", required: false)
@@ -60,20 +59,16 @@
             @RenderBody()
         </main>
     </div>
-
-    <div id="chatbot-messages"></div>
-        <div id="chatbot-quick-buttons" class="p-2 text-center"></div>
-        <div id="chatbot-input-container">
-            <input type="text" id="chatbot-input" placeholder="Digite sua pergunta..." />
-            <button id="chatbot-send" class="btn btn-primary">Enviar</button>
-    </div>
-
-
     <!-- Scripts -->
     <script src="~/js/chatbot.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
+
+    <partial name="_Chatbot" />
+    <link rel="stylesheet" href="~/css/chatbot.css" />
+    <script src="~/js/chatbot.js"></script>
+
 </body>
 </html>

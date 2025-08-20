@@ -1,72 +1,149 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Data;
 using Dapper;
+using System.Data;
 using System.Text.Json;
+using System.Net.Http.Headers;
 
-namespace Estacionamento.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class ChatbotController : ControllerBase
 {
-    [Route("chatbot")]
-    public class ChatBotController : Controller
+    private readonly IDbConnection _cnn;
+    private readonly IConfiguration _config;
+    private readonly HttpClient _httpClient;
+
+    public ChatbotController(IDbConnection cnn, IConfiguration config)
     {
-        private readonly IDbConnection _cnn;
-        private readonly IWebHostEnvironment _env;
+        _cnn = cnn;
+        _config = config;
+        _httpClient = new HttpClient();
+        _httpClient.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", _config["OpenAI:ApiKey"]);
+    }
 
-        public ChatBotController(IDbConnection cnn, IWebHostEnvironment env)
+    [HttpPost("perguntar")]
+    public async Task<IActionResult> Perguntar([FromBody] JsonElement data)
+    {
+        string query = data.GetProperty("pergunta").GetString()?.ToLower() ?? "";
+        string resposta;
+
+        try
         {
-            _cnn = cnn;
-            _env = env;
-        }
-
-        [HttpGet("responder")]
-        public IActionResult Responder([FromQuery] string pergunta)
-        {
-            pergunta = pergunta?.ToLower().Trim() ?? "";
-
-            string resposta;
-
-            if (pergunta.Contains("vaga") && pergunta.Contains("disponível"))
+            if (PerguntaEhComando(query))
             {
-                int total = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM Vagas WHERE Ocupada = false");
-                resposta = $"Temos {total} vaga(s) disponível(is) no momento.";
-            }
-            else if (pergunta.Contains("vaga") && pergunta.Contains("ocupada"))
-            {
-                int ocupadas = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM Vagas WHERE Ocupada = true");
-                resposta = $"Atualmente, {ocupadas} vaga(s) estão ocupadas.";
-            }
-            else if (pergunta.Contains("tarifa") || pergunta.Contains("valor do minuto"))
-            {
-                var valor = _cnn.QueryFirstOrDefault<float>("SELECT ValorCobrado FROM Valores ORDER BY id DESC LIMIT 1");
-                resposta = $"A tarifa padrão atual é de R$ {valor:F2} por minuto.";
-            }
-            else if (pergunta.Contains("ticket") && (pergunta.Contains("ativo") || pergunta.Contains("aberto")))
-            {
-                int ativos = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM Tickets WHERE DataSaida IS NULL");
-                resposta = $"Existem {ativos} ticket(s) ativos no sistema.";
-            }
-            else if (pergunta.Contains("receita") || pergunta.Contains("faturamento"))
-            {
-                var hoje = DateTime.Today;
-                var receita = _cnn.ExecuteScalar<float>(
-                    "SELECT COALESCE(SUM(Valor), 0) FROM Tickets WHERE DataSaida BETWEEN @inicio AND @fim",
-                    new { inicio = hoje, fim = hoje.AddDays(1).AddSeconds(-1) });
-
-                resposta = $"A receita de hoje até agora é de R$ {receita:F2}.";
+                resposta = ExecutaNoBanco(query);
             }
             else
             {
-                resposta = "Desculpe, não entendi sua pergunta. Tente perguntar sobre vagas, tickets, receita ou tarifa.";
+                var contexto = MontaContextoDoSistema();
+                resposta = await ChamarIA(query, contexto);
             }
+        }
+        catch (Exception ex)
+        {
+            resposta = $"❌ Erro ao processar sua pergunta: {ex.Message}";
+        }
 
-            var sugestoesPath = Path.Combine(_env.WebRootPath, "data", "sugestoes.json");
-            var sugestoesJson = System.IO.File.ReadAllText(sugestoesPath);
-            var sugestoes = JsonSerializer.Deserialize<Dictionary<string, string[]>>(sugestoesJson);
+        return Ok(new { resposta });
+    }
 
-            return Json(new
+    private bool PerguntaEhComando(string query)
+    {
+        return query.Contains("ticket") ||
+               query.Contains("vaga") ||
+               query.Contains("tarifa") ||
+               query.Contains("receita") ||
+               query.Contains("cliente");
+    }
+
+    private string ExecutaNoBanco(string query)
+    {
+        if (query.Contains("ticket"))
+        {
+            var count = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM tickets WHERE Pago = 0");
+            return $"🎫 Existem {count} ticket(s) ativos no sistema.";
+        }
+        else if (query.Contains("vaga"))
+        {
+            var livres = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM vagas WHERE Ocupada = 0");
+            return $"🅿️ Temos {livres} vaga(s) livres disponíveis.";
+        }
+        else if (query.Contains("tarifa"))
+        {
+            var tarifa = _cnn.ExecuteScalar<decimal?>(
+                "SELECT Valor FROM tarifas WHERE TipoTarifa = 'Padrão' ORDER BY Id DESC LIMIT 1"
+            ) ?? 0m;
+            return $"💰 A tarifa padrão atual é {tarifa:C} por minuto.";
+        }
+        else if (query.Contains("receita"))
+        {
+            var receita = _cnn.ExecuteScalar<decimal?>(
+                "SELECT SUM(Valor) FROM tickets WHERE Pago = 1 AND DATE(DataSaida) = CURDATE()"
+            ) ?? 0m;
+            return $"📊 A receita de hoje é {receita:C}.";
+        }
+        else if (query.Contains("cliente"))
+        {
+            var clientes = _cnn.Query<string>("SELECT Nome FROM clientes LIMIT 5").ToList();
+            return $"👥 Alguns clientes cadastrados: {string.Join(", ", clientes)}...";
+        }
+
+        return "🤔 Não entendi sua pergunta, tente ser mais específico.";
+    }
+
+    private string MontaContextoDoSistema()
+    {
+        var vagasTotais = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM vagas");
+        var vagasLivres = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM vagas WHERE Ocupada = 0");
+        var receitaHoje = _cnn.ExecuteScalar<decimal?>(
+            "SELECT SUM(Valor) FROM tickets WHERE Pago = 1 AND DATE(DataSaida) = CURDATE()"
+        ) ?? 0m;
+        var tarifaPadrao = _cnn.ExecuteScalar<decimal?>(
+            "SELECT Valor FROM tarifas WHERE TipoTarifa = 'Padrão' ORDER BY Id DESC LIMIT 1"
+        ) ?? 0m;
+
+        return $@"
+        Situação atual do estacionamento:
+        - Vagas totais: {vagasTotais}
+        - Vagas livres: {vagasLivres}
+        - Receita de hoje: {receitaHoje:C}
+        - Tarifa padrão: {tarifaPadrao:C}/minuto
+        ";
+    }
+
+    private async Task<string> ChamarIA(string pergunta, string contexto)
+    {
+        var payload = new
+        {
+            model = "gpt-4o-mini",
+            messages = new[]
             {
-                resposta,
-                sugestoes = sugestoes?["sugestoes"] ?? new string[] { }
-            });
+                new { role = "system", content = "Você é um assistente de estacionamento. Responda sempre em português, de forma clara e útil." },
+                new { role = "user", content = $"Contexto do sistema:\n{contexto}\n\nPergunta do usuário:\n{pergunta}" }
+            }
+        };
+
+        var response = await _httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", payload);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            var erro = await response.Content.ReadAsStringAsync();
+            return $"❌ Erro na API OpenAI: {erro}";
+        }
+
+        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
+
+        try
+        {
+            return json.GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString();
+        }
+        catch
+        {
+            return $"❌ Erro ao interpretar resposta da IA: {json}";
         }
     }
+
 }
