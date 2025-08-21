@@ -1,6 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
     const chatbotBody = document.getElementById("chatbot-body");
     const toggleBtn = document.getElementById("chatbot-toggle");
+    const closeBtn = document.getElementById("chatbot-close"); // botão X
     const sendBtn = document.getElementById("chat-send");
     const input = document.getElementById("chat-input");
     const messages = document.getElementById("chat-messages");
@@ -8,6 +9,12 @@ document.addEventListener("DOMContentLoaded", function () {
     toggleBtn.addEventListener("click", () => {
         chatbotBody.classList.toggle("hidden");
     });
+
+    if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+            chatbotBody.classList.add("hidden");
+        });
+    }
 
     sendBtn.addEventListener("click", sendMessage);
     input.addEventListener("keypress", function (e) {
