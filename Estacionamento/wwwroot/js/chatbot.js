@@ -1,18 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
     const chatbotBody = document.getElementById("chatbot-body");
     const toggleBtn = document.getElementById("chatbot-toggle");
-    const closeBtn = document.getElementById("chatbot-close"); // botão X
+    const closeBtn = document.getElementById("chatbot-close"); 
     const sendBtn = document.getElementById("chat-send");
     const input = document.getElementById("chat-input");
     const messages = document.getElementById("chat-messages");
 
+    // começa fechado
+    chatbotBody.classList.add("hidden");
+
     toggleBtn.addEventListener("click", () => {
-        chatbotBody.classList.toggle("hidden");
+        chatbotBody.classList.remove("hidden"); // abre chat com animação
+        toggleBtn.style.display = "none";       // esconde botão
     });
 
     if (closeBtn) {
         closeBtn.addEventListener("click", () => {
-            chatbotBody.classList.add("hidden");
+            chatbotBody.classList.add("hidden");  // fecha chat
+            setTimeout(() => {
+                toggleBtn.style.display = "block"; // reaparece botão depois da animação
+            }, 300); // mesmo tempo da animação CSS
         });
     }
 

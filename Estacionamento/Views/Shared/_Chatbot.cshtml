@@ -1,13 +1,21 @@
 <div id="chatbot-container">
-    <div id="chatbot-header">
-        🤖 Assistente Virtual
-        <button id="chatbot-toggle">_</button>
-    </div>
+    <!-- Botão Toggle -->
+    <button id="chatbot-toggle" class="btn btn-primary">💬 Assistente</button>
+
+    <!-- Corpo do Chat -->
     <div id="chatbot-body" class="hidden">
+        <div class="chatbot-header">
+            <span>Assistente Virtual</span>
+            <button id="chatbot-close">X</button>
+        </div>
         <div id="chat-messages"></div>
         <div id="chat-input-container">
-            <input type="text" id="chat-input" placeholder="Digite sua mensagem..." />
+            <input id="chat-input" type="text" placeholder="Digite sua mensagem..." />
             <button id="chat-send">Enviar</button>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/chatbot.js"></script>
+}
