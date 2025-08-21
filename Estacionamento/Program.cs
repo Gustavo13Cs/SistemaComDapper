@@ -4,6 +4,7 @@ using Estacionamento.Controllers;
 using Estacionamento.Repositorios;
 using Estacionamento.Servicos;
 using MySqlConnector;
+using SeuProjeto.Controllers;
 
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,53 +1,81 @@
+using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http;
-using System.Net.Http.Json;
+using System.Data;
 using System.Text.Json;
-using System.Threading.Tasks;
+using System.Text;
+using Estacionamento.Models;
 
-namespace Estacionamento.Controllers
+namespace SeuProjeto.Controllers
 {
     [Route("chatbot")]
     public class ChatbotController : Controller
     {
-        private readonly HttpClient _http;
+        private readonly IDbConnection _cnn;
+        private readonly HttpClient _httpClient;
 
-        public ChatbotController(HttpClient httpClient)
+        public ChatbotController(IDbConnection cnn)
         {
-            _http = httpClient;
+            _cnn = cnn;
+            _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:11434/") };
         }
 
         [HttpPost("ask")]
-        public async Task<IActionResult> Ask([FromBody] UserMessage request)
+        public async Task<IActionResult> Ask([FromBody] UserMessage input)
         {
+            string query = input.Message.ToLower();
+            string contexto = "";
+
             try
             {
+                if (query.Contains("vaga"))
+                {
+                    var vagasLivres = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM Vagas WHERE Ocupada = 0");
+                    contexto = $"No momento, existem {vagasLivres} vagas livres no estacionamento.";
+                }
+                else if (query.Contains("ticket"))
+                {
+                    var ticketsAbertos = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM tickets WHERE DataSaida IS NULL;");
+                    contexto = $"Existem {ticketsAbertos} tickets ativos no sistema.";
+                }
+                else if (query.Contains("tarifa"))
+                {
+                    var tarifa = _cnn.ExecuteScalar<decimal>("SELECT Valor FROM Tarifas WHERE TipoTarifa = 'normal' ORDER BY Id DESC LIMIT 1");
+                    contexto = $"A tarifa padrão atual é de {tarifa:C} por minuto.";
+                }
+                else if (query.Contains("receita"))
+                {
+                    var receita = _cnn.ExecuteScalar<decimal>("SELECT IFNULL(SUM(Valor), 0) FROM Tickets WHERE Pago = 1 AND DATE(DataSaida) = CURDATE()");
+                    contexto = $"A receita do estacionamento hoje é de {receita:C}.";
+                }
+                else
+                {
+                    contexto = "Não encontrei informações no banco para essa pergunta. Responda de forma geral e amigável.";
+                }
+
+                // 🔹 Monta o payload para o Ollama
                 var payload = new
                 {
                     model = "mistral", 
-                    prompt = request.Message,
+                    prompt = $"Contexto: {contexto}\nUsuário: {input.Message}\nBot:",
                     stream = false
                 };
 
-                var response = await _http.PostAsJsonAsync("http://localhost:11434/api/generate", payload);
+                var response = await _httpClient.PostAsync("api/generate",
+                    new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
 
                 if (!response.IsSuccessStatusCode)
-                    return BadRequest(new { resposta = "⚠️ Erro ao conectar com o Ollama. Verifique se o servidor está rodando." });
+                    return Json(new { resposta = "⚠️ Erro ao conectar com a IA." });
 
-                var content = await response.Content.ReadAsStringAsync();
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                string respostaIA = doc.RootElement.GetProperty("response").GetString();
 
-                using var doc = JsonDocument.Parse(content);
-                var text = doc.RootElement.GetProperty("response").GetString();
-
-                return Ok(new { resposta = text });
+                return Json(new { resposta = respostaIA });
             }
-            catch (System.Exception ex)
+            catch (Exception ex)
             {
-                return StatusCode(500, new { resposta = $"❌ Erro interno: {ex.Message}" });
+                return Json(new { resposta = $"❌ Erro ao processar: {ex.Message}" });
             }
         }
-    }
-    public class UserMessage
-    {
-        public string Message { get; set; }
     }
 }

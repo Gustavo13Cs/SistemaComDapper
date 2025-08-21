@@ -10,16 +10,16 @@ document.addEventListener("DOMContentLoaded", function () {
     chatbotBody.classList.add("hidden");
 
     toggleBtn.addEventListener("click", () => {
-        chatbotBody.classList.remove("hidden"); // abre chat com animação
-        toggleBtn.style.display = "none";       // esconde botão
+        chatbotBody.classList.remove("hidden"); 
+        toggleBtn.style.display = "none";       
     });
 
     if (closeBtn) {
         closeBtn.addEventListener("click", () => {
-            chatbotBody.classList.add("hidden");  // fecha chat
+            chatbotBody.classList.add("hidden");  
             setTimeout(() => {
-                toggleBtn.style.display = "block"; // reaparece botão depois da animação
-            }, 300); // mesmo tempo da animação CSS
+                toggleBtn.style.display = "block"; 
+            }, 300); 
         });
     }
 
@@ -51,7 +51,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function appendMessage(sender, text) {
         const div = document.createElement("div");
-        div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+        div.classList.add("chat-message");
+
+        if (sender === "Você") {
+            div.classList.add("user-message");
+        } else {
+            div.classList.add("bot-message");
+        }
+
+        div.innerHTML = `<span>${text}</span>`;
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
     }
