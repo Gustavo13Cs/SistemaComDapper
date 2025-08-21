@@ -1,149 +1,53 @@
 using Microsoft.AspNetCore.Mvc;
-using Dapper;
-using System.Data;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text.Json;
-using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
-[ApiController]
-[Route("api/[controller]")]
-public class ChatbotController : ControllerBase
+namespace Estacionamento.Controllers
 {
-    private readonly IDbConnection _cnn;
-    private readonly IConfiguration _config;
-    private readonly HttpClient _httpClient;
-
-    public ChatbotController(IDbConnection cnn, IConfiguration config)
+    [Route("chatbot")]
+    public class ChatbotController : Controller
     {
-        _cnn = cnn;
-        _config = config;
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", _config["OpenAI:ApiKey"]);
-    }
+        private readonly HttpClient _http;
 
-    [HttpPost("perguntar")]
-    public async Task<IActionResult> Perguntar([FromBody] JsonElement data)
-    {
-        string query = data.GetProperty("pergunta").GetString()?.ToLower() ?? "";
-        string resposta;
-
-        try
+        public ChatbotController(HttpClient httpClient)
         {
-            if (PerguntaEhComando(query))
+            _http = httpClient;
+        }
+
+        [HttpPost("ask")]
+        public async Task<IActionResult> Ask([FromBody] UserMessage request)
+        {
+            try
             {
-                resposta = ExecutaNoBanco(query);
+                var payload = new
+                {
+                    model = "mistral", 
+                    prompt = request.Message,
+                    stream = false
+                };
+
+                var response = await _http.PostAsJsonAsync("http://localhost:11434/api/generate", payload);
+
+                if (!response.IsSuccessStatusCode)
+                    return BadRequest(new { resposta = "⚠️ Erro ao conectar com o Ollama. Verifique se o servidor está rodando." });
+
+                var content = await response.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(content);
+                var text = doc.RootElement.GetProperty("response").GetString();
+
+                return Ok(new { resposta = text });
             }
-            else
+            catch (System.Exception ex)
             {
-                var contexto = MontaContextoDoSistema();
-                resposta = await ChamarIA(query, contexto);
+                return StatusCode(500, new { resposta = $"❌ Erro interno: {ex.Message}" });
             }
         }
-        catch (Exception ex)
-        {
-            resposta = $"❌ Erro ao processar sua pergunta: {ex.Message}";
-        }
-
-        return Ok(new { resposta });
     }
-
-    private bool PerguntaEhComando(string query)
+    public class UserMessage
     {
-        return query.Contains("ticket") ||
-               query.Contains("vaga") ||
-               query.Contains("tarifa") ||
-               query.Contains("receita") ||
-               query.Contains("cliente");
+        public string Message { get; set; }
     }
-
-    private string ExecutaNoBanco(string query)
-    {
-        if (query.Contains("ticket"))
-        {
-            var count = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM tickets WHERE Pago = 0");
-            return $"🎫 Existem {count} ticket(s) ativos no sistema.";
-        }
-        else if (query.Contains("vaga"))
-        {
-            var livres = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM vagas WHERE Ocupada = 0");
-            return $"🅿️ Temos {livres} vaga(s) livres disponíveis.";
-        }
-        else if (query.Contains("tarifa"))
-        {
-            var tarifa = _cnn.ExecuteScalar<decimal?>(
-                "SELECT Valor FROM tarifas WHERE TipoTarifa = 'Padrão' ORDER BY Id DESC LIMIT 1"
-            ) ?? 0m;
-            return $"💰 A tarifa padrão atual é {tarifa:C} por minuto.";
-        }
-        else if (query.Contains("receita"))
-        {
-            var receita = _cnn.ExecuteScalar<decimal?>(
-                "SELECT SUM(Valor) FROM tickets WHERE Pago = 1 AND DATE(DataSaida) = CURDATE()"
-            ) ?? 0m;
-            return $"📊 A receita de hoje é {receita:C}.";
-        }
-        else if (query.Contains("cliente"))
-        {
-            var clientes = _cnn.Query<string>("SELECT Nome FROM clientes LIMIT 5").ToList();
-            return $"👥 Alguns clientes cadastrados: {string.Join(", ", clientes)}...";
-        }
-
-        return "🤔 Não entendi sua pergunta, tente ser mais específico.";
-    }
-
-    private string MontaContextoDoSistema()
-    {
-        var vagasTotais = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM vagas");
-        var vagasLivres = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM vagas WHERE Ocupada = 0");
-        var receitaHoje = _cnn.ExecuteScalar<decimal?>(
-            "SELECT SUM(Valor) FROM tickets WHERE Pago = 1 AND DATE(DataSaida) = CURDATE()"
-        ) ?? 0m;
-        var tarifaPadrao = _cnn.ExecuteScalar<decimal?>(
-            "SELECT Valor FROM tarifas WHERE TipoTarifa = 'Padrão' ORDER BY Id DESC LIMIT 1"
-        ) ?? 0m;
-
-        return $@"
-        Situação atual do estacionamento:
-        - Vagas totais: {vagasTotais}
-        - Vagas livres: {vagasLivres}
-        - Receita de hoje: {receitaHoje:C}
-        - Tarifa padrão: {tarifaPadrao:C}/minuto
-        ";
-    }
-
-    private async Task<string> ChamarIA(string pergunta, string contexto)
-    {
-        var payload = new
-        {
-            model = "gpt-4o-mini",
-            messages = new[]
-            {
-                new { role = "system", content = "Você é um assistente de estacionamento. Responda sempre em português, de forma clara e útil." },
-                new { role = "user", content = $"Contexto do sistema:\n{contexto}\n\nPergunta do usuário:\n{pergunta}" }
-            }
-        };
-
-        var response = await _httpClient.PostAsJsonAsync("https://api.openai.com/v1/chat/completions", payload);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var erro = await response.Content.ReadAsStringAsync();
-            return $"❌ Erro na API OpenAI: {erro}";
-        }
-
-        var json = await response.Content.ReadFromJsonAsync<JsonElement>();
-
-        try
-        {
-            return json.GetProperty("choices")[0]
-                    .GetProperty("message")
-                    .GetProperty("content")
-                    .GetString();
-        }
-        catch
-        {
-            return $"❌ Erro ao interpretar resposta da IA: {json}";
-        }
-    }
-
 }

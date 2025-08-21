@@ -1,5 +1,6 @@
 using System.Data;
 using System.Globalization;
+using Estacionamento.Controllers;
 using Estacionamento.Repositorios;
 using Estacionamento.Servicos;
 using MySqlConnector;
@@ -21,6 +22,8 @@ builder.Services.AddScoped(typeof(IRepositorio<>), typeof(RepositorioDapper<>));
 builder.Services.AddSingleton<EmailService>();
 
 builder.Services.AddScoped<TarifaService>();
+builder.Services.AddHttpClient<ChatbotController>();
+
 
 
 

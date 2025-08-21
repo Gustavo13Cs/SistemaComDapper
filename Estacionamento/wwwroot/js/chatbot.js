@@ -1,67 +1,44 @@
-(() => {
-const messagesEl = document.getElementById("chatbot-messages");
-    const inputEl = document.getElementById("chatbot-input-field"); 
-    const sendBtn = document.getElementById("chatbot-send");
-    const closeBtn = document.getElementById("chatbot-close");
-    const toggleBtn = document.getElementById("chatbot-toggle");  
+document.addEventListener("DOMContentLoaded", function () {
+    const chatbotBody = document.getElementById("chatbot-body");
+    const toggleBtn = document.getElementById("chatbot-toggle");
+    const sendBtn = document.getElementById("chat-send");
+    const input = document.getElementById("chat-input");
+    const messages = document.getElementById("chat-messages");
 
-// Função para adicionar mensagens na tela
-function appendMessage(sender, text) {
-    const msg = document.createElement("div");
-    msg.className = sender === "user" ? "message user" : "message bot"; // usa .message + .user/.bot
-    msg.innerText = text;
-    messagesEl.appendChild(msg);
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-}
+    toggleBtn.addEventListener("click", () => {
+        chatbotBody.classList.toggle("hidden");
+    });
 
-// Função para enviar mensagem ao backend
-async function sendMessage(text = null) {
-    const message = text || inputEl.value.trim();
-    if (!message) return;
-
-    appendMessage("user", message);
-    inputEl.value = "";
-
-    try {
-        const response = await fetch("/api/chatbot/perguntar", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pergunta: message })
-        });
-
-        const data = await response.json();
-        appendMessage("bot", data.resposta);
-    } catch (err) {
-        appendMessage("bot", "❌ Erro ao conectar com o assistente.");
-    }
-}
-
-// Eventos
-if (sendBtn) {
-    sendBtn.addEventListener("click", () => sendMessage());
-}
-
-if (inputEl) {
-    inputEl.addEventListener("keypress", (e) => {
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keypress", function (e) {
         if (e.key === "Enter") sendMessage();
     });
-}
 
-if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-        const container = document.getElementById("chatbot-container");
-        if (container) container.style.display = "none";
-    });
-}
+    async function sendMessage() {
+        const text = input.value.trim();
+        if (!text) return;
 
-if (toggleBtn) {
-    toggleBtn.addEventListener("click", () => {
-        const container = document.getElementById("chatbot-container");
-        if (container) {
-            container.style.display =
-                (container.style.display === "none" || container.style.display === "")
-                ? "flex"
-                : "none";
+        appendMessage("Você", text);
+        input.value = "";
+
+        try {
+            const response = await fetch("/chatbot/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: text })
+            });
+
+            const data = await response.json();
+            appendMessage("Bot", data.resposta || "Erro ao obter resposta.");
+        } catch (err) {
+            appendMessage("Bot", "⚠️ Não foi possível conectar ao servidor Ollama.");
         }
-    });
-}})();
+    }
+
+    function appendMessage(sender, text) {
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${sender}:</strong> ${text}`;
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+});

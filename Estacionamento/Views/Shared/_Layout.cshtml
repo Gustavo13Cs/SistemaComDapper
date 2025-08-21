@@ -11,6 +11,7 @@
 
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/chatbot.css" />
     <link rel="stylesheet" href="~/css/Home/home.css" asp-append-version="true" />
 
     @RenderSection("Styles", required: false)
@@ -66,8 +67,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @RenderSection("Scripts", required: false)
 
-    <partial name="_Chatbot" />
-    <link rel="stylesheet" href="~/css/chatbot.css" />
+    @await Html.PartialAsync("_Chatbot")
     <script src="~/js/chatbot.js"></script>
 
 </body>
