@@ -43,3 +43,8 @@
     <br />
     <button type="submit" class="btn btn-primary">Cadastrar</button>
 </form>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

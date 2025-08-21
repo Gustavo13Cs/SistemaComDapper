@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Estacionamento.Models
 {
@@ -12,6 +14,8 @@ namespace Estacionamento.Models
         /// <summary>
         /// Valor por minuto da tarifa.
         /// </summary>
+        [DisplayFormat(DataFormatString = "{0:N2}", ApplyFormatInEditMode = true)]
+        [Column(TypeName = "decimal(10,2)")]
         public decimal Valor { get; set; }
         /// <summary>
         /// Hora de início da tarifa (apenas para "Especial").

@@ -3,6 +3,7 @@ using System.Globalization;
 using Estacionamento.Controllers;
 using Estacionamento.Repositorios;
 using Estacionamento.Servicos;
+using Microsoft.AspNetCore.Localization;
 using MySqlConnector;
 using SeuProjeto.Controllers;
 
@@ -13,7 +14,12 @@ var cultureInfo = new CultureInfo("pt-BR");
 CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
 CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
-// registra DI para conexão Dapper/MySQL
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("pt-BR");
+    options.SupportedCultures = new[] { cultureInfo };
+    options.SupportedUICultures = new[] { cultureInfo };
+});
 var connectionString = builder.Configuration.GetConnectionString("Default");
 
 builder.Services.AddScoped<IDbConnection>((sp) =>
@@ -32,7 +38,10 @@ builder.Services.AddHttpClient<ChatbotController>();
 builder.Services.AddControllersWithViews();
 
 
+
 var app = builder.Build();
+
+app.UseRequestLocalization();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

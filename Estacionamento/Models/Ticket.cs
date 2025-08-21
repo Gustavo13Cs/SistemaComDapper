@@ -15,7 +15,6 @@ namespace Estacionamento.Models
         public DateTime? DataSaida { get; set; }
         public float? Valor { get; set; }
 
-        // FKs
         public int VeiculoId { get; set; }
         [IgnoreInDapper]
         public Veiculo Veiculo { get; set; }

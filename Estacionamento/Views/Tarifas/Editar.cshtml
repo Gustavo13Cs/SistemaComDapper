@@ -1,73 +1,65 @@
 @model Estacionamento.Models.Tarifas
+
 @{
     ViewData["Title"] = "Editar Tarifa";
-
     var tiposTarifa = new List<string> { "Normal", "Especial" };
-
     var dias = new List<(int? valor, string nome)>
-    {
-        (null, "Todos"),
-        (0, "Domingo"),
-        (1, "Segunda"),
-        (2, "Terça"),
-        (3, "Quarta"),
-        (4, "Quinta"),
-        (5, "Sexta"),
-        (6, "Sábado")
-    };
+{
+(null, "Todos"),
+(0, "Domingo"),
+(1, "Segunda"),
+(2, "Terça"),
+(3, "Quarta"),
+(4, "Quinta"),
+(5, "Sexta"),
+(6, "Sábado")
+};
 }
 
+
 <h2>Editar Tarifa</h2>
-<form method="post" action="/tarifas/@Model.Id/alterar">
+
+<form asp-action="Alterar" method="post">
     <div class="form-group">
-        <label for="TipoTarifa">Tipo de Tarifa</label>
-        <select name="TipoTarifa" class="form-control" required>
+        <label asp-for="TipoTarifa"></label>
+        <select asp-for="TipoTarifa" class="form-control">
             @foreach (var tipo in tiposTarifa)
             {
-                if (Model.TipoTarifa == tipo)
-                {
-                    @: <option value="@tipo" selected="selected">@tipo</option>
-                }
-                else
-                {
-                    @: <option value="@tipo">@tipo</option>
-                }
+                <option value="@tipo" selected="@(Model.TipoTarifa == tipo)">@tipo</option>
             }
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="Valor">Valor</label>
-        <input type="number" step="0.01" name="Valor" value="@Model.Valor" class="form-control" required />
-    </div>
 
     <div class="form-group">
-        <label for="HoraInicio">Hora Início (apenas para Especial)</label>
-        <input type="time" name="HoraInicio" value="@(Model.HoraInicio?.ToString(@"hh\:mm"))" class="form-control" />
+        <label asp-for="HoraInicio"></label>
+        <input asp-for="HoraInicio" class="form-control" type="time" />
     </div>
 
-    <div class="form-group">
-        <label for="HoraFim">Hora Fim (apenas para Especial)</label>
-        <input type="time" name="HoraFim" value="@(Model.HoraFim?.ToString(@"hh\:mm"))" class="form-control" />
-    </div>
 
     <div class="form-group">
-        <label for="DiaSemana">Dia da Semana (opcional)</label>
-        <select name="DiaSemana" class="form-control">
+        <label asp-for="HoraFim"></label>
+        <input asp-for="HoraFim" class="form-control" type="time" />
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="Valor"></label>
+        <input asp-for="Valor" class="form-control" type="text" inputmode="decimal" />
+        <span asp-validation-for="Valor" class="text-danger"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label asp-for="DiaSemana"></label>
+        <select asp-for="DiaSemana" class="form-control">
             @foreach (var dia in dias)
             {
-                if (Model.DiaSemana == dia.valor)
-                {
-                    @: <option value="@(dia.valor?.ToString() ?? "")" selected="selected">@dia.nome</option>
-                }
-                else
-                {
-                    @: <option value="@(dia.valor?.ToString() ?? "")">@dia.nome</option>
-                }
+                <option value="@dia.valor" selected="@(Model.DiaSemana == dia.valor)">@dia.nome</option>
             }
         </select>
     </div>
-
-    <button type="submit" class="btn btn-success mt-3">Salvar</button>
-    <a href="/tarifas" class="btn btn-secondary mt-3">Voltar</a>
+    <br>
+    <button type="submit" class="btn btn-primary">Salvar</button>
+    <a asp-action="Index" class="btn btn-secondary">Voltar</a>
 </form>

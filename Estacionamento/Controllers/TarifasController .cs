@@ -43,6 +43,12 @@ namespace Estacionamento.Controllers
         [HttpPost("criar")]
         public async Task<IActionResult> Criar([FromForm] Tarifas tarifa)
         {
+            tarifa.Valor = decimal.Parse(
+                tarifa.Valor.ToString(),
+                new CultureInfo("pt-BR")
+            );
+
+            tarifa.DataCriacao = DateTime.Now;
             _repo.Inserir(tarifa);
             return Redirect("/tarifas");
         }
@@ -71,6 +77,13 @@ namespace Estacionamento.Controllers
         public async Task<IActionResult> Alterar([FromRoute] int id, [FromForm] Tarifas tarifa)
         {
             tarifa.Id = id;
+
+            tarifa.Valor = decimal.Parse(
+                tarifa.Valor.ToString(),
+                new CultureInfo("pt-BR")
+            );
+
+            tarifa.DataCriacao = DateTime.Now;
             _repo.Atualizar(tarifa);
             return Redirect("/tarifas");
         }
