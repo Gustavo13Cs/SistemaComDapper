@@ -24,11 +24,10 @@ namespace Estacionamento.Controllers
         public IActionResult Index()
         {
             var tarifas = _cnn.Query<Tarifas>("SELECT * FROM Tarifas ORDER BY TipoTarifa DESC, HoraInicio").ToList();
-
-            var tarifaPadrao = tarifas.FirstOrDefault(t => t.TipoTarifa == "Normal");
+            var tarifasNormais = tarifas.Where(t => t.TipoTarifa == "Normal").ToList();
             var tarifasEspeciais = tarifas.Where(t => t.TipoTarifa == "Especial").ToList();
 
-            ViewBag.TarifaPadrao = tarifaPadrao;
+            ViewBag.TarifasNormais = tarifasNormais;
             ViewBag.TarifasEspeciais = tarifasEspeciais;
 
             return View();
