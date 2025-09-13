@@ -212,13 +212,99 @@ namespace Estacionamento.Controllers
         private void EnviarComprovantePorEmail(Ticket ticket)
         {
             var cliente = ticket.Veiculo.Cliente;
+            string assunto = "Seu Comprovante de Pagamento do Estacionamento";
 
-            string assunto = "Comprovante de Pagamento - Estacionamento";
+            // ----- INÍCIO DO NOVO TEMPLATE PROFISSIONAL -----
             string corpo = $@"
-                <h2>✅ Pagamento Confirmado!</h2>
-                <p>Olá, <strong>{cliente.Nome}</strong>,</p>
-                <p>Seu ticket <strong>#{ticket.Id}</strong> foi pago com sucesso.</p>
-                <p>Valor: R$ {ticket.Valor?.ToString("F2")}</p>";
+        <html lang=""pt-br"">
+        <head>
+            <meta charset=""UTF-8"">
+            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"">
+            <title>Comprovante de Pagamento</title>
+        </head>
+        <body style=""margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;"">
+            
+            <table align=""center"" border=""0"" cellpadding=""0"" cellspacing=""0"" width=""600"" style=""border-collapse: collapse; margin-top: 20px; margin-bottom: 20px; background-color: #ffffff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);"">
+                
+                <tr>
+                    <td align=""center"" style=""background-color: #2c3e50; padding: 30px;"">
+                        <h1 style=""color: #ffffff; margin: 0; font-size: 28px;"">Estacionamento Digital</h1>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style=""padding: 40px 30px 30px 30px;"">
+                        <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"">
+                            <tr>
+                                <td align=""center"">
+                                    <span style=""font-size: 50px;"">✅</span>
+                                    <h2 style=""color: #2ecc71; margin-top: 10px; margin-bottom: 20px; font-size: 24px;"">Pagamento Confirmado!</h2>
+                                    <p style=""color: #555555; font-size: 16px; line-height: 1.5;"">
+                                        Olá, <strong>{cliente.Nome}</strong>,
+                                    </p>
+                                    <p style=""color: #555555; font-size: 16px; line-height: 1.5; margin-top: 0;"">
+                                        Recebemos seu pagamento com sucesso. Obrigado por utilizar nossos serviços!
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style=""padding: 0 30px 30px 30px;"">
+                        <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""border-top: 2px solid #eeeeee; padding-top: 20px;"">
+                            <tr>
+                                <td style=""padding: 10px 0; color: #777777; font-size: 15px;"">Ticket ID:</td>
+                                <td align=""right"" style=""padding: 10px 0; color: #333333; font-size: 16px; font-weight: bold;"">#{ticket.Id}</td>
+                            </tr>
+                            <tr>
+                                <td style=""padding: 10px 0; color: #777777; font-size: 15px;"">Veículo (Placa):</td>
+                                <td align=""right"" style=""padding: 10px 0; color: #333333; font-size: 16px; font-weight: bold;"">
+                                    {ticket.Veiculo.Placa} </td>
+                            </tr>
+                            <tr>
+                                <td style=""padding: 10px 0; color: #777777; font-size: 15px;"">Data de Entrada:</td>
+                                <td align=""right"" style=""padding: 10px 0; color: #333333; font-size: 16px; font-weight: bold;"">
+                                    {ticket.DataEntrada.ToString("G")} </td>
+                            </tr>
+                            <tr>
+                                <td style=""padding: 10px 0; color: #777777; font-size: 15px;"">Data de Saída:</td>
+                                <td align=""right"" style=""padding: 10px 0; color: #333333; font-size: 16px; font-weight: bold;"">
+                                    {ticket.DataSaida.Value.ToString("G")} </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style=""padding: 0 30px 40px 30px;"">
+                        <table border=""0"" cellpadding=""0"" cellspacing=""0"" width=""100%"" style=""border-top: 2px solid #eeeeee; padding-top: 20px;"">
+                            <tr>
+                                <td style=""padding: 10px 0; color: #333333; font-size: 20px; font-weight: bold;"">VALOR TOTAL:</td>
+                                <td align=""right"" style=""padding: 10px 0; color: #2ecc71; font-size: 24px; font-weight: bold;"">
+                                    R$ {ticket.Valor.Value.ToString("F2")}
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td align=""center"" style=""background-color: #f9f9f9; padding: 30px; border-top: 1px solid #eeeeee;"">
+                        <p style=""color: #999999; font-size: 12px; margin: 0;"">
+                            © 2025 [NOME DO SEU ESTACIONAMENTO]. Todos os direitos reservados.<br>
+                            Este é um e-mail transacional automático. Por favor, não responda.
+                        </p>
+                    </td>
+                </tr>
+
+            </table>
+
+        </body>
+        </html>
+        ";
+            // ----- FIM DO NOVO TEMPLATE -----
 
             _emailService.Enviar(cliente.Email, assunto, corpo);
         }
