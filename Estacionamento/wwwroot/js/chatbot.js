@@ -5,8 +5,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const sendBtn = document.getElementById("chat-send");
     const input = document.getElementById("chat-input");
     const messages = document.getElementById("chat-messages");
+    let chatHistory = []; 
 
-    // começa fechado
     chatbotBody.classList.add("hidden");
 
     toggleBtn.addEventListener("click", () => {
@@ -29,38 +29,39 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     async function sendMessage() {
-    const text = input.value.trim();
-        if (!text) return;
+        const text = input.value.trim();
+            if (!text) return;
 
-        appendMessage("Você", text);
-        input.value = "";
+            appendMessage("Você", text);
+            input.value = "";
 
-        // 1. Cria e mostra o indicador de "digitando..."
-        const typingIndicator = createTypingIndicator();
-        messages.appendChild(typingIndicator);
-        messages.scrollTop = messages.scrollHeight;
+            const typingIndicator = createTypingIndicator();
+            messages.appendChild(typingIndicator);
+            messages.scrollTop = messages.scrollHeight;
 
-        try {
-            const response = await fetch("/chatbot/ask", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message: text })
-            });
+            try {
+                const response = await fetch("/chatbot/ask", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ history: chatHistory})
+                });
 
-            const data = await response.json();
-            
-            // 2. Remove o indicador antes de mostrar a resposta
-            messages.removeChild(typingIndicator); 
-            appendMessage("Bot", data.resposta || "Erro ao obter resposta.");
+                const data = await response.json();
+                
+                messages.removeChild(typingIndicator); 
+                appendMessage("Bot", data.resposta || "Erro ao obter resposta.");
 
-        } catch (err) {
-            // 3. Remove o indicador MESMO SE DER ERRO
-            messages.removeChild(typingIndicator); 
-            appendMessage("Bot", "⚠️ Não foi possível conectar ao servidor.");
-        }
-    }
+            } catch (err) {
+                messages.removeChild(typingIndicator); 
+                appendMessage("Bot", "⚠️ Não foi possível conectar ao servidor.");
+            }
+}
 
     function appendMessage(sender, text) {
+
+        const role = (sender === "Você") ? "user" : "assistant";
+        chatHistory.push({ role: role, content: text });
+
         const div = document.createElement("div");
         div.classList.add("chat-message");
 
@@ -70,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function () {
             div.classList.add("bot-message");
         }
 
-       div.innerHTML = `<span>${text}</span>`;
+        div.innerHTML = `<span>${text}</span>`;
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
     }

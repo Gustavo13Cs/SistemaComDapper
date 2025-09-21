@@ -5,6 +5,9 @@ using System.Text.Json;
 using System.Text;
 using Estacionamento.Models;
 
+using static Estacionamento.Models.IAReques;
+using Estacionamento.Servicos;
+
 namespace SeuProjeto.Controllers
 {
     [Route("chatbot")]
@@ -12,51 +15,50 @@ namespace SeuProjeto.Controllers
     {
         private readonly IDbConnection _cnn;
         private readonly HttpClient _httpClient;
+        private readonly IntentionService _intentionService;
 
-        public ChatbotController(IDbConnection cnn)
+        public ChatbotController(IDbConnection cnn, IntentionService intentionService, HttpClient httpClient)
         {
             _cnn = cnn;
-            _httpClient = new HttpClient { BaseAddress = new Uri("http://localhost:11434/") };
+            _intentionService = intentionService;
+            _httpClient = httpClient;
         }
 
         [HttpPost("ask")]
-        public async Task<IActionResult> Ask([FromBody] UserMessage input)
+        public async Task<IActionResult> Ask([FromBody] ChatRequest input)
         {
-            string query = input.Message.ToLower();
-            string contexto = "";
-
+             var lastUserMessage = input.History.LastOrDefault(m => m.Role == "user");
+             if (lastUserMessage == null)
+                return BadRequest("Nenhuma mensagem de usuário encontrada.");
+            
+            string query = lastUserMessage.Content.ToLower();
             try
             {
-                if (query.Contains("vaga"))
-                {
-                    var vagasLivres = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM Vagas WHERE Ocupada = 0");
-                    contexto = $"No momento, existem {vagasLivres} vagas livres no estacionamento.";
-                }
-                else if (query.Contains("ticket"))
-                {
-                    var ticketsAbertos = _cnn.ExecuteScalar<int>("SELECT COUNT(*) FROM tickets WHERE DataSaida IS NULL;");
-                    contexto = $"Existem {ticketsAbertos} tickets ativos no sistema.";
-                }
-                else if (query.Contains("tarifa"))
-                {
-                    var tarifa = _cnn.ExecuteScalar<decimal>("SELECT Valor FROM Tarifas WHERE TipoTarifa = 'normal' ORDER BY Id DESC LIMIT 1");
-                    contexto = $"A tarifa padrão atual é de {tarifa:C} por minuto.";
-                }
-                else if (query.Contains("receita"))
-                {
-                    var receita = _cnn.ExecuteScalar<decimal>("SELECT IFNULL(SUM(Valor), 0) FROM Tickets WHERE Pago = 1 AND DATE(DataSaida) = CURDATE()");
-                    contexto = $"A receita do estacionamento hoje é de {receita:C}.";
-                }
-                else
+                string contexto = await _intentionService.FindBestIntentionContextAsync(query);
+                if (contexto == null)
                 {
                     contexto = "Não encontrei informações no banco para essa pergunta. Responda de forma geral e amigável.";
                 }
 
-                // 🔹 Monta o payload para o Ollama
+                var promptBuilder = new StringBuilder();
+                promptBuilder.AppendLine("Você é um assistente prestativo de um sistema de estacionamento.");
+                promptBuilder.AppendLine("Responda de forma concisa e amigável baseado no contexto e no histórico da conversa.");
+                if (!string.IsNullOrWhiteSpace(contexto))
+                {
+                    promptBuilder.AppendLine($"\n[Contexto Relevante para a Pergunta Atual]: {contexto}");
+                }
+
+                foreach (var message in input.History)
+                {
+                    var role = message.Role == "user" ? "Usuário" : "Assistente";
+                    promptBuilder.AppendLine($"{role}: {message.Content}");
+                }
+                promptBuilder.Append("Assistente:");
+
                 var payload = new
                 {
-                    model = "mistral", 
-                    prompt = $"Contexto: {contexto}\nUsuário: {input.Message}\nBot:",
+                    model = "mistral",
+                    prompt = promptBuilder.ToString(),
                     stream = false
                 };
 

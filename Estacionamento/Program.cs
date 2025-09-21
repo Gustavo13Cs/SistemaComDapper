@@ -1,6 +1,5 @@
 using System.Data;
 using System.Globalization;
-using Estacionamento.Controllers;
 using Estacionamento.Repositorios;
 using Estacionamento.Servicos;
 using Microsoft.AspNetCore.Localization;
@@ -27,19 +26,30 @@ new MySqlConnection(connectionString));
 
 builder.Services.AddScoped(typeof(IRepositorio<>), typeof(RepositorioDapper<>));
 builder.Services.AddSingleton<EmailService>();
-
+builder.Services.AddSingleton<IntentionService>();
 builder.Services.AddScoped<TarifaService>();
-builder.Services.AddHttpClient<ChatbotController>();
 
-
-
+builder.Services.AddHttpClient<ChatbotController>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:11434/");
+});
+builder.Services.AddHttpClient<IntentionService>(client =>
+{
+    client.BaseAddress = new Uri("http://localhost:11434/");
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
 
-
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var intentionService = scope.ServiceProvider.GetRequiredService<IntentionService>();
+    await intentionService.InitializeAsync();
+}
+
 
 app.UseRequestLocalization();
 
