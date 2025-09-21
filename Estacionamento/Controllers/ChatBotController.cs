@@ -57,7 +57,7 @@ namespace SeuProjeto.Controllers
 
                 var payload = new
                 {
-                    model = "mistral",
+                    model = "gemma:2b",
                     prompt = promptBuilder.ToString(),
                     stream = false
                 };
