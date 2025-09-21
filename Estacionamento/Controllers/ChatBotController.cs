@@ -17,11 +17,11 @@ namespace SeuProjeto.Controllers
         private readonly HttpClient _httpClient;
         private readonly IntentionService _intentionService;
 
-        public ChatbotController(IDbConnection cnn, IntentionService intentionService, HttpClient httpClient)
+        public ChatbotController(IDbConnection cnn, IntentionService intentionService, IHttpClientFactory httpClientFactory)
         {
             _cnn = cnn;
             _intentionService = intentionService;
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient("OllamaClient");
         }
 
         [HttpPost("ask")]

@@ -29,16 +29,12 @@ builder.Services.AddSingleton<EmailService>();
 builder.Services.AddSingleton<IntentionService>();
 builder.Services.AddScoped<TarifaService>();
 
-builder.Services.AddHttpClient<ChatbotController>(client =>
-{
-    client.BaseAddress = new Uri("http://localhost:11434/");
-});
-builder.Services.AddHttpClient<IntentionService>(client =>
+builder.Services.AddHttpClient("OllamaClient", client =>
 {
     client.BaseAddress = new Uri("http://localhost:11434/");
 });
 
-// Add services to the container.
+
 builder.Services.AddControllersWithViews();
 
 

@@ -1,18 +1,15 @@
-using System;
-using System.Collections.Generic;
+using System.Text.Json.Serialization; 
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Dapper;
+
 
 namespace Estacionamento.Servicos
 {
-
     public class Intention
     {
-        public string Description { get; set; } // A frase que descreve a intenção
-        public Func<string> Action { get; set; } // O código que busca a info no BD
-        public float[] Vector { get; set; } // O "cérebro" da intenção
+        public string Description { get; set; }
+        public Func<string> Action { get; set; }
+        public float[] Vector { get; set; }
     }
     
     public class IntentionService
@@ -21,10 +18,10 @@ namespace Estacionamento.Servicos
         private readonly HttpClient _httpClient;
         private readonly IServiceProvider _serviceProvider;
 
-        public IntentionService(IServiceProvider serviceProvider,HttpClient httpClient)
+        public IntentionService(IServiceProvider serviceProvider, IHttpClientFactory  httpClientFactory)
         {
             _serviceProvider = serviceProvider;
-            _httpClient = httpClient;
+            _httpClient = httpClientFactory.CreateClient("OllamaClient");
             
             _intentions = new List<Intention>
             {
@@ -56,7 +53,7 @@ namespace Estacionamento.Servicos
                         using (var scope = _serviceProvider.CreateScope())
                         {
                             var cnn = scope.ServiceProvider.GetRequiredService<IDbConnection>();
-                            var receita = cnn.ExecuteScalar<decimal>("SELECT IFNULL(SUM(Valor), 0) FROM Tickets WHERE Pago = 1 AND DATE(DataSaida) = CURDATE()");
+                            var receita = cnn.ExecuteScalar<decimal?>("SELECT SUM(ValorCobrado) FROM historicovagas WHERE DATE(DataSaida) = CURDATE()");
                             return $"A receita do estacionamento hoje é de {receita:C}.";
                         }
                     }
@@ -64,7 +61,6 @@ namespace Estacionamento.Servicos
             };
         }
 
-        // Este método deve ser chamado na inicialização do seu app (em Program.cs)
         public async Task InitializeAsync()
         {
             foreach (var intention in _intentions)
@@ -73,17 +69,25 @@ namespace Estacionamento.Servicos
             }
         }
 
-        // Novo método para encontrar a melhor intenção
         public async Task<string> FindBestIntentionContextAsync(string userQuery)
         {
             var queryVector = await GetEmbeddingAsync(userQuery);
-            if (queryVector == null) return null;
+            if (queryVector == null)
+            {
+                Console.WriteLine($"Não foi possível gerar o vetor para a query: {userQuery}");
+                return null;
+            }
 
             Intention bestIntention = null;
             double highestSimilarity = -1;
 
             foreach (var intention in _intentions)
             {
+                if (intention.Vector == null)
+                {
+                    Console.WriteLine($"Vetor nulo para a intenção: {intention.Description}");
+                    continue; 
+                }
                 double similarity = CosineSimilarity(queryVector, intention.Vector);
                 if (similarity > highestSimilarity)
                 {
@@ -92,27 +96,45 @@ namespace Estacionamento.Servicos
                 }
             }
 
-            // Um "threshold" para ter certeza. Se a melhor intenção ainda for muito diferente, ignore.
-            if (highestSimilarity > 0.6) // Ajuste este valor conforme os testes
+            if (highestSimilarity > 0.6)
             {
-                return bestIntention.Action(); // Executa a busca no BD!
+                return bestIntention.Action();
             }
 
-            return null; // Nenhuma intenção relevante encontrada
+            return null;
         }
 
-        // Método para chamar a API de embeddings do Ollama
         private async Task<float[]> GetEmbeddingAsync(string text)
         {
-            var payload = new { model = "nomic-embed-text", prompt = text };
+            var payload = new 
+            { 
+                model = "nomic-embed-text", 
+                prompt = text,
+                options = new {
+                    embedding_only = true 
+                }
+            };
+            
             var response = await _httpClient.PostAsJsonAsync("/api/embeddings", payload);
-            if(!response.IsSuccessStatusCode) return null;
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Erro ao chamar a API de embedding. Status: {response.StatusCode}, Resposta: {errorContent}");
+                return null;
+            }
 
             var result = await response.Content.ReadFromJsonAsync<OllamaEmbeddingResponse>();
-            return result?.Embedding.Select(d => (float)d).ToArray();
+            
+            if (result?.Embedding == null)
+            {
+                Console.WriteLine("A resposta do Ollama foi bem-sucedida, mas a propriedade 'embedding' veio nula ou vazia no JSON.");
+                return null;
+            }
+
+            return result.Embedding.Select(d => (float)d).ToArray();
         }
 
-        // A matemática da similaridade
         private double CosineSimilarity(float[] vecA, float[] vecB)
         {
             double dotProduct = 0.0;
@@ -127,6 +149,10 @@ namespace Estacionamento.Servicos
             return dotProduct / (Math.Sqrt(normA) * Math.Sqrt(normB));
         }
 
-        private class OllamaEmbeddingResponse { public double[] Embedding { get; set; } }
+        private class OllamaEmbeddingResponse
+        {
+            [JsonPropertyName("embedding")]             public double[] Embedding { get; set; }
+        }
+        
     }
 }
