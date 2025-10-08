@@ -1,0 +1,76 @@
+body {
+    background-color: #1a1a2e; /* Azul Escuro Elegante */
+    color: #e0e0e0; /* Texto claro */
+    font-family: 'Arial', sans-serif;
+}
+
+/* 2. Container Central e Card */
+.login-container {
+    /* Define o container para ocupar toda a altura da viewport */
+    min-height: 100vh; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-card {
+    background: #252a42; /* Fundo do card ligeiramente mais claro */
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); /* Sombra profissional */
+    padding: 3rem; /* Aumenta o padding interno */
+    transition: transform 0.3s ease-in-out;
+}
+
+/* 3. Estilos dos Formulários */
+.form-control {
+    background-color: #343b56; /* Fundo do input escuro */
+    border: 1px solid #4a5170;
+    color: #e0e0e0;
+    padding: 0.75rem 1rem;
+}
+
+.form-control:focus {
+    background-color: #343b56;
+    border-color: #00bcd4; /* Cor de foco turquesa */
+    box-shadow: 0 0 0 0.25rem rgba(0, 188, 212, 0.25);
+    color: #e0e0e0;
+}
+
+/* 4. Botão Principal (Entrar) */
+.btn-primary {
+    background-color: #00bcd4; /* Turquesa */
+    border-color: #00bcd4;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #00a0b7;
+    border-color: #00a0b7;
+}
+
+/* 5. Botão Secundário (Registrar) */
+.btn-success {
+    background-color: #4CAF50; /* Verde mais vibrante */
+    border-color: #4CAF50;
+    font-weight: bold;
+}
+
+.btn-success:hover {
+    background-color: #43a047;
+    border-color: #43a047;
+}
+
+/* 6. Links e Títulos */
+a {
+    color: #00bcd4; /* Cor turquesa para links */
+    text-decoration: none;
+}
+a:hover {
+    color: #e0e0e0;
+}
+
+.text-info { /* Sobrescreve o bootstrap para o título (que você usa text-info) */
+    color: #00bcd4 !important; 
+}

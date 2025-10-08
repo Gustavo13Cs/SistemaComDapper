@@ -1,0 +1,47 @@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Login";
+}
+
+<div class="container login-container">
+    <div class="card login-card" style="max-width: 420px;">
+        <h2 class="text-center text-info mb-5 fw-bold">
+            <i class="bi bi-person-circle me-2"></i>Acesso ao Sistema
+        </h2>
+
+        @if (TempData["Erro"] != null)
+        {
+            <div class="alert alert-danger text-center">@TempData["Erro"]</div>
+        }
+
+        <form method="post" action="/conta/login">
+            <div class="mb-4">
+                <label for="email" class="form-label fw-semibold">E-mail</label>
+                <input type="email" id="email" name="email" class="form-control" placeholder="seu.email@exemplo.com" required>
+            </div>
+
+            <div class="mb-4">
+                <label for="senha" class="form-label fw-semibold">Senha</label>
+                <input type="password" id="senha" name="senha" class="form-control" placeholder="******" required>
+            </div>
+
+            <div class="form-check mb-5">
+                <input class="form-check-input" type="checkbox" name="lembrar" id="lembrar">
+                <label class="form-check-label" for="lembrar">
+                    Manter-me conectado
+                </label>
+            </div>
+
+            <div class="d-grid mb-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> ENTRAR
+                </button>
+            </div>
+
+            <div class="text-center">
+                <small class="text-secondary">Ainda não tem uma conta?</small><br>
+                <a href="/conta/registrar" class="fw-semibold mt-1">Crie uma conta agora</a>
+            </div>
+        </form>
+    </div>
+</div>

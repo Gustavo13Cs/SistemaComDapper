@@ -1,10 +1,11 @@
 using System.Data;
 using System.Globalization;
 using Estacionamento.Repositorios;
+using Estacionamento.Services;
 using Estacionamento.Servicos;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Localization;
 using MySqlConnector;
-using SeuProjeto.Controllers;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,15 +29,22 @@ builder.Services.AddScoped(typeof(IRepositorio<>), typeof(RepositorioDapper<>));
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddSingleton<IntentionService>();
 builder.Services.AddScoped<TarifaService>();
+builder.Services.AddScoped<AuthService>(); 
 
 builder.Services.AddHttpClient("OllamaClient", client =>
 {
     client.BaseAddress = new Uri("http://localhost:11434/");
 });
 
-
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/conta/login";
+        options.AccessDeniedPath = "/conta/acesso-negado";
+    });
 builder.Services.AddControllersWithViews();
-
+builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -63,6 +71,17 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.Use(async (context, next) =>
+{
+    if (!context.User.Identity.IsAuthenticated && !context.Request.Path.StartsWithSegments("/conta"))
+    {
+        context.Response.Redirect("/conta/login");
+        return;
+    }
+    await next();
+});
+
 
 app.MapControllerRoute(
     name: "default",
