@@ -29,12 +29,20 @@ builder.Services.AddScoped(typeof(IRepositorio<>), typeof(RepositorioDapper<>));
 builder.Services.AddSingleton<EmailService>();
 builder.Services.AddSingleton<IntentionService>();
 builder.Services.AddScoped<TarifaService>();
-builder.Services.AddScoped<AuthService>(); 
+builder.Services.AddScoped<AuthService>();
 
 builder.Services.AddHttpClient("OllamaClient", client =>
 {
     client.BaseAddress = new Uri("http://localhost:11434/");
 });
+
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -67,6 +75,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseSession();
+
 
 app.UseAuthorization();
 

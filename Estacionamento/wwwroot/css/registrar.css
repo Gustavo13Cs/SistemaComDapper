@@ -7,40 +7,40 @@ body {
     font-family: "Poppins", sans-serif;
 }
 
-.login-card {
+.register-card {
     background-color: #ffffff;
     border-radius: 16px;
     padding: 40px 35px;
     box-shadow: 0px 10px 25px rgba(0,0,0,0.2);
-    width: 380px;
+    width: 420px;
     text-align: center;
 }
 
-.login-card h2 {
+.register-card h2 {
     font-weight: 700;
     margin-bottom: 25px;
     color: #0f172a;
 }
 
-.btn-primary {
-    background-color: #2563eb;
+.btn-success {
+    background-color: #16a34a;
     border: none;
     transition: all 0.2s ease-in-out;
 }
 
-.btn-primary:hover {
-    background-color: #1d4ed8;
+.btn-success:hover {
+    background-color: #15803d;
     transform: scale(1.03);
 }
 
-.register-link {
+.login-link {
     display: block;
     margin-top: 15px;
     color: #2563eb;
     text-decoration: none;
 }
 
-.register-link:hover {
+.login-link:hover {
     text-decoration: underline;
 }
 

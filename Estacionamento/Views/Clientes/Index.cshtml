@@ -4,7 +4,6 @@
     <div class="text-center mb-5">
         <h1 class="display-5 text-info fw-bold">Clientes</h1>
 
-        <!-- 🔍 Campo de busca -->
         <form method="get" asp-action="Index" class="d-flex justify-content-center mt-4 mb-3">
             <input type="text" name="busca" class="form-control me-2 w-50" placeholder="Buscar por nome ou CPF..." value="@Context.Request.Query["busca"]" />
             <button type="submit" class="btn btn-outline-info">Pesquisar</button>
