@@ -43,6 +43,30 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.ToString().ToLower();
+
+    if (!path.Contains("/conta/login") &&
+        !path.Contains("/conta/registrar") &&
+        !path.StartsWith("/css") &&
+        !path.StartsWith("/js") &&
+        !path.StartsWith("/lib") &&
+        !path.StartsWith("/images"))
+    {
+        var usuarioId = context.Session.GetInt32("UsuarioId");
+
+        if (usuarioId == null)
+        {
+            context.Response.Redirect("/Conta/Login");
+            return;
+        }
+    }
+
+    await next.Invoke();
+});
+
+
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>

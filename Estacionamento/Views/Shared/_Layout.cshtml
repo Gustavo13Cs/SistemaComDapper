@@ -19,7 +19,20 @@
     <link rel="stylesheet" href="~/css/chatbot.css" />
     <link rel="stylesheet" href="~/css/Home/home.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/login.css" />
+    
+    <header class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" asp-controller="Home" asp-action="Index">🚗 Estacionamento</a>
 
+            <div class="d-flex align-items-center">
+                @if (Context.Session.GetInt32("UsuarioId") != null)
+                {
+                    <span class="text-white me-3">Olá, <strong>@Context.Session.GetString("UsuarioNome")</strong></span>
+                    <a class="btn btn-outline-light btn-sm" asp-controller="Conta" asp-action="Logout">Sair</a>
+                }
+            </div>
+        </div>
+    </header>
     @RenderSection("Styles", required: false)
 </head>
 <body style="background-color: #1f1f2e; color: #f0f0f0;">
